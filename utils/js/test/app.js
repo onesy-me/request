@@ -1,5 +1,6 @@
 const path = require('path');
 const http = require('http');
+const fg = require('fast-glob');
 
 const express = require('express');
 const cors = require('cors');
@@ -84,7 +85,7 @@ const run = async () => {
 
     response.data = {
       fields,
-      file: files?.file?.filepath && await AmauiNode.file.get(files?.file?.filepath),
+      file: files?.file?.filepath && await AmauiNode.file.get(files?.file?.filepath, false),
     };
 
     return res.status(200).json(response);

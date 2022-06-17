@@ -379,7 +379,7 @@ class AmauiRequest {
 
       // CSRF
       if (withCredentials || isValid('same-origin', url)) {
-        const csrfValue = AmauiCookie.get(csrf.cookie);
+        const csrfValue = new AmauiCookie().get(csrf.cookie);
 
         if (csrfValue && csrf.headers) headers[csrf.headers] = csrfValue;
       }
