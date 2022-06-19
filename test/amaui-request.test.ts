@@ -9,55 +9,18 @@ import { assert } from '@amaui/test';
 import { wait } from '@amaui/utils';
 import AmauiNode from '@amaui/node';
 
-import { startBrowsers, IBrowsers, evaluate, closeBrowsers } from '../utils/js/test/utils';
+import { evaluate, evaluateBrowser, utils } from '../utils/js/test/utils';
 
 import AmauiRequest from '../src';
 import { AmauiRequestResponse } from '../src/amaui-request';
 
 if (!global.amauiEvents) global.amauiEvents = new events.EventEmitter();
 
-preEveryTo(() => {
-  AmauiRequest.reset();
-});
-
 group('@amaui/request', () => {
-  let browsers: IBrowsers;
   const filePath = path.resolve(__dirname, '../LICENSE');
 
-  pre(async () => {
-    browsers = await startBrowsers();
-
-    for (const [index, name] of Object.keys(browsers).entries()) {
-      const browser = browsers[name];
-
-      // Note that Promise.all prevents a race condition
-      // between clicking and waiting for the file chooser.
-      const [_, fileChooser] = await Promise.all([
-        // Add the input element
-        evaluate((window: any) => {
-          const input = window.document.createElement('input');
-
-          input.type = 'file';
-          input.id = 'a';
-
-          window.document.body.appendChild(input);
-        }, { browsers: { [name]: browser } }),
-
-        // It is important to call waitForEvent before click to set up waiting.
-        browser.page.waitForEvent('filechooser'),
-
-        // Opens the file chooser.
-        browser.page.locator('#a').click(),
-      ]);
-
-      await fileChooser.setFiles(filePath);
-    }
-  });
-
-  preTo(() => AmauiRequest.reset());
-
-  post(async () => {
-    await closeBrowsers(browsers);
+  preEveryGroupTo(async () => {
+    AmauiRequest.reset();
   });
 
   group('AmaRequestResponse', () => {
@@ -104,7 +67,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate((window: any) => [
         window.AmauiRequest.amauirequest instanceof window.AmauiRequest,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -146,7 +109,7 @@ group('@amaui/request', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => [
           (await window.AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
-        ], { browsers });
+        ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -167,7 +130,7 @@ group('@amaui/request', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => [
           (await window.AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/postsa/1' })).status,
-        ], { browsers });
+        ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -201,7 +164,7 @@ group('@amaui/request', () => {
           return [
             await method,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -237,8 +200,6 @@ group('@amaui/request', () => {
 
         group('request', () => {
 
-          preTo(() => AmauiRequest.reset());
-
           to('withCredentials', async () => {
             const valueBrowsers = await evaluate(async (window: any) => {
               window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
@@ -257,7 +218,7 @@ group('@amaui/request', () => {
                 (response.request as any).headers,
                 (response1.request as any).headers,
               ];
-            }, { browsers });
+            });
             const values = [...valueBrowsers];
 
             values.forEach(value => {
@@ -281,7 +242,7 @@ group('@amaui/request', () => {
               const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return (response.request as any).headers;
-            }, { browsers });
+            });
             const valueNode = (values_.request as any).headers;
             const values = [valueNode, ...valueBrowsers];
 
@@ -309,7 +270,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', true)).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
@@ -392,7 +353,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
@@ -440,7 +401,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -476,7 +437,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -518,7 +479,7 @@ group('@amaui/request', () => {
                     return [
                       (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.get('http://localhost:4000/zip')).response,
                   ];
@@ -542,7 +503,7 @@ group('@amaui/request', () => {
                     return [
                       (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.get('http://localhost:4000/zip')).response,
                   ];
@@ -602,7 +563,7 @@ group('@amaui/request', () => {
               return [
                 await method,
               ];
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -612,8 +573,6 @@ group('@amaui/request', () => {
         });
 
         group('response', () => {
-
-          preTo(() => AmauiRequest.reset());
 
           to('pure', async () => {
             AmauiRequest.defaults.request.response.pure = true;
@@ -642,7 +601,7 @@ group('@amaui/request', () => {
               values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -700,7 +659,7 @@ group('@amaui/request', () => {
               ];
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -711,8 +670,6 @@ group('@amaui/request', () => {
           });
 
           group('type', () => {
-
-            preTo(() => AmauiRequest.reset());
 
             group('browser', () => {
 
@@ -725,7 +682,7 @@ group('@amaui/request', () => {
                   return [
                     typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -742,7 +699,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -759,7 +716,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -776,7 +733,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -793,7 +750,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -870,7 +827,7 @@ group('@amaui/request', () => {
                 values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
                 return values_;
-              }, { browsers });
+              });
               const valueNode = values_;
               const values = [valueNode, ...valueBrowsers];
 
@@ -895,8 +852,6 @@ group('@amaui/request', () => {
 
         group('request', () => {
 
-          preTo(() => AmauiRequest.reset());
-
           to('withCredentials', async () => {
             const valueBrowsers = await evaluate(async (window: any) => {
               window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
@@ -915,7 +870,7 @@ group('@amaui/request', () => {
                 (response.request as any).headers,
                 (response1.request as any).headers,
               ];
-            }, { browsers });
+            });
             const values = [...valueBrowsers];
 
             values.forEach(value => {
@@ -939,7 +894,7 @@ group('@amaui/request', () => {
               const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return (response.request as any).headers;
-            }, { browsers });
+            });
             const valueNode = (values_.request as any).headers;
             const values = [valueNode, ...valueBrowsers];
 
@@ -967,7 +922,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', true)).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
@@ -1050,7 +1005,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
@@ -1098,7 +1053,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -1134,7 +1089,7 @@ group('@amaui/request', () => {
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                       (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -1176,7 +1131,7 @@ group('@amaui/request', () => {
                     return [
                       (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.get('http://localhost:4000/zip')).response,
                   ];
@@ -1200,7 +1155,7 @@ group('@amaui/request', () => {
                     return [
                       (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await AmauiRequest.get('http://localhost:4000/zip')).response,
                   ];
@@ -1263,7 +1218,7 @@ group('@amaui/request', () => {
                 await method,
                 window.navigator.userAgent,
               ];
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -1273,8 +1228,6 @@ group('@amaui/request', () => {
         });
 
         group('response', () => {
-
-          preTo(() => AmauiRequest.reset());
 
           to('pure', async () => {
             AmauiRequest.defaults.get.response = { pure: true };
@@ -1303,7 +1256,7 @@ group('@amaui/request', () => {
               values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -1361,7 +1314,7 @@ group('@amaui/request', () => {
               ];
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -1372,8 +1325,6 @@ group('@amaui/request', () => {
           });
 
           group('type', () => {
-
-            preTo(() => AmauiRequest.reset());
 
             group('browser', () => {
 
@@ -1386,7 +1337,7 @@ group('@amaui/request', () => {
                   return [
                     typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -1403,7 +1354,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -1420,7 +1371,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -1437,7 +1388,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -1454,7 +1405,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -1529,7 +1480,7 @@ group('@amaui/request', () => {
                 values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
                 return values_;
-              }, { browsers });
+              });
               const valueNode = values_;
               const values = [valueNode, ...valueBrowsers];
 
@@ -1559,7 +1510,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1580,7 +1531,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1599,7 +1550,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1618,7 +1569,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1640,7 +1591,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.head('https://jsonplaceholder.typicode.com/posts/1')).status,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1658,7 +1609,7 @@ group('@amaui/request', () => {
         return [
           (await method as any).type,
         ];
-      }, { browsers });
+      });
       const valueNode = (await AmauiRequest.options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
 
       assert(valueNode).eq('GET,HEAD,PUT,PATCH,POST,DELETE');
@@ -1675,7 +1626,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await window.AmauiRequest.delete('https://jsonplaceholder.typicode.com/posts/1')).status,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -1703,9 +1654,7 @@ group('@amaui/request', () => {
         result.push(window.AmauiRequest.defaults);
 
         return result;
-      }, { browsers });
-
-      AmauiRequest.reset();
+      });
 
       values_.push(AmauiRequest.defaults);
 
@@ -1743,7 +1692,7 @@ group('@amaui/request', () => {
               (response.request as any).headers,
               (response1.request as any).headers,
             ];
-          }, { browsers });
+          });
           const values = [...valueBrowsers];
 
           values.forEach(value => {
@@ -1763,7 +1712,7 @@ group('@amaui/request', () => {
             const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
             return (response.request as any).headers;
-          }, { browsers });
+          });
           const valueNode = (values_.request as any).headers;
           const values = [valueNode, ...valueBrowsers];
 
@@ -1791,7 +1740,7 @@ group('@amaui/request', () => {
                     (await amauiRequest.post('http://localhost:4000/unzip', true)).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.post('http://localhost:4000/unzip', 'a')).response,
                   (await amauiRequest.post('http://localhost:4000/unzip', 4)).response,
@@ -1874,7 +1823,7 @@ group('@amaui/request', () => {
                     (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
@@ -1922,7 +1871,7 @@ group('@amaui/request', () => {
                     (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                   (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -1958,7 +1907,7 @@ group('@amaui/request', () => {
                     (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
                   (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
@@ -1998,7 +1947,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauiRequest.get('http://localhost:4000/zip')).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.get('http://localhost:4000/zip')).response,
                 ];
@@ -2020,7 +1969,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauiRequest.get('http://localhost:4000/zip')).response,
                   ];
-                }, { browsers });
+                });
                 const valueNode = [
                   (await amauiRequest.get('http://localhost:4000/zip')).response,
                 ];
@@ -2078,7 +2027,7 @@ group('@amaui/request', () => {
             return [
               await method,
             ];
-          }, { browsers });
+          });
           const valueNode = values_;
           const values = [valueNode, ...valueBrowsers];
 
@@ -2104,7 +2053,7 @@ group('@amaui/request', () => {
             values_.push(await new window.AmauiRequest({ response: { pure: false } }).get('https://jsonplaceholder.typicode.com/posts/1'));
 
             return values_;
-          }, { browsers });
+          });
           const valueNode = values_;
           const values = [valueNode, ...valueBrowsers];
 
@@ -2162,7 +2111,7 @@ group('@amaui/request', () => {
             ];
 
             return values_;
-          }, { browsers });
+          });
           const valueNode = values_;
           const values = [valueNode, ...valueBrowsers];
 
@@ -2183,7 +2132,7 @@ group('@amaui/request', () => {
                 return [
                   typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                 ];
-              }, { browsers });
+              });
               const values = [...valueBrowsers];
 
               values.forEach(value => assert(value).eql([
@@ -2198,7 +2147,7 @@ group('@amaui/request', () => {
                 return [
                   (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                 ];
-              }, { browsers });
+              });
               const values = [...valueBrowsers];
 
               values.forEach(value => assert(value).eql([
@@ -2213,7 +2162,7 @@ group('@amaui/request', () => {
                 return [
                   (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                 ];
-              }, { browsers });
+              });
               const values = [...valueBrowsers];
 
               values.forEach(value => assert(value).eql([
@@ -2228,7 +2177,7 @@ group('@amaui/request', () => {
                 return [
                   (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                 ];
-              }, { browsers });
+              });
               const values = [...valueBrowsers];
 
               values.forEach(value => assert(value).eql([
@@ -2243,7 +2192,7 @@ group('@amaui/request', () => {
                 return [
                   (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                 ];
-              }, { browsers });
+              });
               const values = [...valueBrowsers];
 
               values.forEach(value => assert(value).eql([
@@ -2308,7 +2257,7 @@ group('@amaui/request', () => {
               values_.push((await amauirequest1.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -2338,7 +2287,7 @@ group('@amaui/request', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => [
           (await new window.AmauiRequest().request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
-        ], { browsers });
+        ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -2383,7 +2332,7 @@ group('@amaui/request', () => {
             return [
               await method,
             ];
-          }, { browsers });
+          });
           const valueNode = values_;
           const values = [valueNode, ...valueBrowsers];
 
@@ -2406,7 +2355,7 @@ group('@amaui/request', () => {
                 (response.request as any).headers,
                 (response1.request as any).headers,
               ];
-            }, { browsers });
+            });
             const values = [...valueBrowsers];
 
             values.forEach(value => {
@@ -2426,7 +2375,7 @@ group('@amaui/request', () => {
               const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
 
               return (response.request as any).headers;
-            }, { browsers });
+            });
             const valueNode = (values_.request as any).headers;
             const values = [valueNode, ...valueBrowsers];
 
@@ -2454,7 +2403,7 @@ group('@amaui/request', () => {
                       (await amauiRequest.post('http://localhost:4000/unzip', true, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                       (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.post('http://localhost:4000/unzip', 'a', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', 4, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
@@ -2537,7 +2486,7 @@ group('@amaui/request', () => {
                       (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
                       (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
@@ -2585,7 +2534,7 @@ group('@amaui/request', () => {
                       (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
                       (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
@@ -2621,7 +2570,7 @@ group('@amaui/request', () => {
                       (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                       (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
                     (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
@@ -2661,7 +2610,7 @@ group('@amaui/request', () => {
                     return [
                       (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } })).response,
                   ];
@@ -2683,7 +2632,7 @@ group('@amaui/request', () => {
                     return [
                       (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } })).response,
                     ];
-                  }, { browsers });
+                  });
                   const valueNode = [
                     (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } })).response,
                   ];
@@ -2741,7 +2690,7 @@ group('@amaui/request', () => {
               return [
                 await method,
               ];
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -2767,7 +2716,7 @@ group('@amaui/request', () => {
               values_.push(await new window.AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: false } }));
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -2825,7 +2774,7 @@ group('@amaui/request', () => {
               ];
 
               return values_;
-            }, { browsers });
+            });
             const valueNode = values_;
             const values = [valueNode, ...valueBrowsers];
 
@@ -2846,7 +2795,7 @@ group('@amaui/request', () => {
                   return [
                     typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'text' } })).response === 'string',
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -2861,7 +2810,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'json' } })).response instanceof Object,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -2876,7 +2825,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'arraybuffer' } })).response instanceof ArrayBuffer,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -2891,7 +2840,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'blob' } })).response instanceof Blob,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -2906,7 +2855,7 @@ group('@amaui/request', () => {
                   return [
                     (await amauirequest.get('https://jsonplaceholder.typicode.com', { response: { type: 'document' } })).response instanceof Document,
                   ];
-                }, { browsers });
+                });
                 const values = [...valueBrowsers];
 
                 values.forEach(value => assert(value).eql([
@@ -2967,7 +2916,7 @@ group('@amaui/request', () => {
                 values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: false } } })).response);
 
                 return values_;
-              }, { browsers });
+              });
               const valueNode = values_;
               const values = [valueNode, ...valueBrowsers];
 
@@ -2997,7 +2946,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1')).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3018,7 +2967,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3037,7 +2986,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3056,7 +3005,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3078,7 +3027,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().head('https://jsonplaceholder.typicode.com/posts/1')).status,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3096,7 +3045,7 @@ group('@amaui/request', () => {
         return [
           (await method as any).type,
         ];
-      }, { browsers });
+      });
       const valueNode = (await new AmauiRequest().options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
 
       assert(valueNode).eq('GET,HEAD,PUT,PATCH,POST,DELETE');
@@ -3113,7 +3062,7 @@ group('@amaui/request', () => {
 
       const valueBrowsers = await evaluate(async (window: any) => [
         (await new window.AmauiRequest().delete('https://jsonplaceholder.typicode.com/posts/1')).status,
-      ], { browsers });
+      ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3175,7 +3124,7 @@ group('@amaui/request', () => {
             interceptors.success[0].status,
             interceptors.success[1].status,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3240,7 +3189,7 @@ group('@amaui/request', () => {
             interceptors.error[0].status,
             interceptors.error[1].status,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3319,7 +3268,7 @@ group('@amaui/request', () => {
             interceptors.fail[0].type === 'abort',
             interceptors.fail[1].type === 'abort',
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3370,7 +3319,7 @@ group('@amaui/request', () => {
             },
           })).response,
         ];
-      }, { browsers });
+      });
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
 
@@ -3418,7 +3367,31 @@ group('@amaui/request', () => {
         return [
           (await window.AmauiRequest.post('http://localhost:4000/multipart', form)).response,
         ];
-      }, { browsers });
+      }, {
+        preEvaluate: async browser => {
+          // Note that Promise.all prevents a race condition
+          // between clicking and waiting for the file chooser.
+          const [_, fileChooser] = await Promise.all([
+            // Add the input element
+            evaluateBrowser((window: any) => {
+              const input = window.document.createElement('input');
+
+              input.type = 'file';
+              input.id = 'a';
+
+              if (!window.document.getElementById('a')) window.document.body.appendChild(input);
+            }, { browser }),
+
+            // It is important to call waitForEvent before click to set up waiting.
+            browser.page.waitForEvent('filechooser'),
+
+            // Opens the file chooser.
+            browser.page.locator('#a').click(),
+          ]);
+
+          await fileChooser.setFiles(filePath);
+        }
+      });
       const valueNode = values_;
 
       assert(valueNode).eql([
@@ -3464,7 +3437,31 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        }, {
+          preEvaluate: async browser => {
+            // Note that Promise.all prevents a race condition
+            // between clicking and waiting for the file chooser.
+            const [_, fileChooser] = await Promise.all([
+              // Add the input element
+              evaluateBrowser((window: any) => {
+                const input = window.document.createElement('input');
+
+                input.type = 'file';
+                input.id = 'a';
+
+                if (!window.document.getElementById('a')) window.document.body.appendChild(input);
+              }, { browser }),
+
+              // It is important to call waitForEvent before click to set up waiting.
+              browser.page.waitForEvent('filechooser'),
+
+              // Opens the file chooser.
+              browser.page.locator('#a').click(),
+            ]);
+
+            await fileChooser.setFiles(filePath);
+          }
+        });
 
         const values = [...valueBrowsers];
 
@@ -3497,7 +3494,7 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        });
 
         const valueNode = values_;
 
@@ -3559,7 +3556,7 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3592,7 +3589,7 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3625,7 +3622,7 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3652,7 +3649,7 @@ group('@amaui/request', () => {
               ad: 'a4',
             })).response,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
@@ -3688,7 +3685,7 @@ group('@amaui/request', () => {
               },
             })).response,
           ];
-        }, { browsers });
+        });
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
 
