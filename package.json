@@ -1,6 +1,6 @@
 {
   "name": "@amaui/request",
-  "version": "1.0.11114",
+  "version": "1.0.11117",
   "description": "Requests client for browser and nodejs",
   "repository": "https://github.com/amaui-org/amaui-request.git",
   "author": "Lazar <lazareric.com@gmail.com>",
@@ -39,10 +39,12 @@
     "test": "yarn lint && yarn type && yarn build && yarn test:pre && yarn cov && yarn test:post"
   },
   "dependencies": {
-    "@amaui/cookie": "^1.0.11114",
-    "@amaui/subscription": "^1.0.11114",
-    "@amaui/utils": "^1.0.11114",
-    "@amaui/zip": "^1.0.11114",
+    "@amaui/cookie": "^1.0.11117",
+    "@amaui/huffman-code": "^1.0.11117",
+    "@amaui/lz77": "^1.0.11117",
+    "@amaui/subscription": "^1.0.11117",
+    "@amaui/utils": "^1.0.11117",
+    "@amaui/zip": "^1.0.11117",
     "@babel/runtime": "^7.18.3"
   },
   "devDependencies": {
