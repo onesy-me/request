@@ -99,6 +99,14 @@
     "@amaui/utils" "^1.0.11411"
     "@babel/runtime" "^7.18.3"
 
+"@amaui/subscription@^1.0.11147":
+  version "1.0.11147"
+  resolved "https://registry.yarnpkg.com/@amaui/subscription/-/subscription-1.0.11147.tgz#345d4e4d09249008a939e1abc8a6dbfc35d4fc26"
+  integrity sha512-mVw0Z6TQtEuUTb7JpvpsTEK0EknoqRx8nxlrp4iNArt56G2L1Tb0Eu/qbSoPZAEwGLcveszwz8ofaqtw3IfBWw==
+  dependencies:
+    "@amaui/utils" "^1.0.11411"
+    "@babel/runtime" "^7.18.3"
+
 "@amaui/test@^1.0.11117":
   version "1.0.11117"
   resolved "https://registry.yarnpkg.com/@amaui/test/-/test-1.0.11117.tgz#1676be47f5c76bcb88ec9b4ec0a109a3742c3dcd"

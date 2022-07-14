@@ -1,6 +1,6 @@
 {
   "name": "@amaui/request",
-  "version": "1.0.11141",
+  "version": "1.0.11144",
   "description": "Requests client for browser and nodejs",
   "repository": "https://github.com/amaui-org/amaui-request.git",
   "author": "Lazar <lazareric.com@gmail.com>",
@@ -42,7 +42,7 @@
     "@amaui/cookie": "^1.0.11141",
     "@amaui/huffman-code": "^1.0.11141",
     "@amaui/lz77": "^1.0.11147",
-    "@amaui/subscription": "^1.0.11144",
+    "@amaui/subscription": "^1.0.11147",
     "@amaui/utils": "^1.0.11411",
     "@amaui/zip": "^1.0.11141",
     "@babel/runtime": "^7.18.3"
