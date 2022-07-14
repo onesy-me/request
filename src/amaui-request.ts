@@ -2,7 +2,15 @@ import http from 'http';
 import https from 'https';
 import events from 'events';
 
-import { is, isValid, isEnvironment, merge, parse, copy, getURL, serialize, castParam } from '@amaui/utils';
+import is from '@amaui/utils/is';
+import isValid from '@amaui/utils/isValid';
+import isEnvironment from '@amaui/utils/isEnvironment';
+import merge from '@amaui/utils/merge';
+import parse from '@amaui/utils/parse';
+import copy from '@amaui/utils/copy';
+import getURL from '@amaui/utils/getURL';
+import serialize from '@amaui/utils/serialize';
+import castParam from '@amaui/utils/castParam';
 import AmauiCookie from '@amaui/cookie';
 import AmauiSubscription from '@amaui/subscription';
 import AmauiZip from '@amaui/zip';
