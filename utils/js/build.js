@@ -3,6 +3,7 @@ const childProcess = require('child_process');
 const yargs = require('yargs');
 const fse = require('fs-extra');
 
+const AmauiNode = require('@amaui/node').default;
 const { promisify } = require('@amaui/utils');
 
 const wd = process.cwd();
@@ -55,6 +56,44 @@ async function buildBabel(variant = 'esm') {
     console.error('Build babel error: \n' + error + response, '\n\n');
 
     throw new Error();
+  }
+  else {
+    // From the esm folder remove the required values
+    // for it to not have webpack > 5 issues as a ref
+    if (variant === 'esm') {
+      const amauiRequestPath = path.join(out, 'amaui-request.js');
+
+      let values = await AmauiNode.file.get(amauiRequestPath, false);
+
+      values = values.split('\n');
+
+      // Remove http, https, events imports
+      values = [values[0], ...values.slice(4)];
+
+      // global.amauiEvents
+      let index = values.findIndex(item => item.includes('global.amauiEvents'));
+
+      values.splice(index, 1);
+
+      // Update adapter
+      index = values.findIndex(item => item.includes(`return isEnvironment('browser') ? this.xhr(options) : this.https(options);`));
+
+      values[index] = `return this.xhr(options);`
+
+      // Other
+      index = values.findIndex(item => item.includes(`import isEnvironment from '@amaui/utils/isEnvironment';`));
+
+      values.splice(index, 1);
+
+      // https method
+      const startIndex = values.findIndex(item => item.includes('https() {'));
+      const endIndex = values.findIndex(item => item.includes(`global.amauiEvents.emit('amaui-request-sent');`)) + 4;
+
+      values = [...values.slice(0, startIndex), ...values.slice(endIndex)];
+
+      // Update
+      await AmauiNode.file.update(amauiRequestPath, values.join('\n'));
+    }
   }
 
   if (response) console.log(response);

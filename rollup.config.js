@@ -15,7 +15,7 @@ const module = path.basename(process.cwd());
 const globals = {
   'http': 'http',
   'https': 'https',
-  'events': 'events',
+  'events': 'events'
 };
 
 const extensions = ['.ts', '.js'];

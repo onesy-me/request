@@ -1,5 +1,7 @@
 {
-  "extends": ["tslint:recommended"],
+  "extends": [
+    "tslint:recommended"
+  ],
   "rules": {
     "array-type": false,
     "no-console": false,
@@ -15,6 +17,7 @@
     "object-literal-shorthand": false,
     "no-unused-expression": false,
     "prefer-for-of": false,
-    "no-bitwise": false
+    "no-bitwise": false,
+    "no-var-requires": false
   }
 }

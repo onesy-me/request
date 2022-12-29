@@ -1,7 +1,6 @@
 import http from 'http';
 import https from 'https';
 import events from 'events';
-
 import is from '@amaui/utils/is';
 import isValid from '@amaui/utils/isValid';
 import isEnvironment from '@amaui/utils/isEnvironment';
@@ -376,6 +375,10 @@ class AmauiRequest {
     return new Promise(async (resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
+      // Run request pre interceptors
+      // Each method is provided with options object as a reference
+      await this.onPre(options);
+
       const { url: urlOptions, method, request: requestOptions, response: responseOptions, cancel } = options;
 
       let body = options.body;
@@ -391,10 +394,6 @@ class AmauiRequest {
 
         if (csrfValue && csrf.headers) headers[csrf.headers] = csrfValue;
       }
-
-      // Run request pre interceptors
-      // Each method is provided with options object as a reference
-      await this.onPre(options);
 
       xhr.open(method.toUpperCase(), url, true);
 
@@ -537,14 +536,14 @@ class AmauiRequest {
 
   private https(options: IOptionsRequest = {}): Promise<IAmauiRequestResponse> {
     return new Promise(async (resolve, reject) => {
+      // Run request pre interceptors
+      // Each method is provided with options object as a reference
+      await this.onPre(options);
+
       const { url: urlOptions, method, body: bodyOptions, request: requestOptions, response: responseOptions, cancel } = options;
 
       const { headers = {}, agents, timeout } = requestOptions;
       const { type: typeOptions, parse: parse_, pure, resolveOnError } = responseOptions;
-
-      // Run request pre interceptors
-      // Each method is provided with options object as a reference
-      await this.onPre(options);
 
       const headersNamesNormalized = Object.keys(headers).map(key => key.toLowerCase());
 
