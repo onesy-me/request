@@ -12,11 +12,11 @@ import AmauiNode from '@amaui/node';
 import { evaluate, evaluateBrowser, utils } from '../utils/js/test/utils';
 
 import AmauiRequest from '../src';
-import { AmauiRequestResponse } from '../src/amaui-request';
+import { AmauiRequestResponse } from '../src/AmauiRequest';
 
 if (!global.amauiEvents) global.amauiEvents = new events.EventEmitter();
 
-group('@amaui/request', () => {
+group('AmauiRequest', () => {
   const filePath = path.resolve(__dirname, '../LICENSE');
 
   preEveryGroupTo(async () => {

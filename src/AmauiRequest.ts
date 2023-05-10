@@ -23,18 +23,22 @@ export type TResponseTypeNode = 'buffer' | 'json' | 'text';
 
 export type TBody = Blob | BufferSource | FormData | URLSearchParams | Record<any, any> | string | any;
 
-type TXhrEvent = ProgressEvent<EventTarget>;
+export type TXhrEvent = ProgressEvent<EventTarget>;
 
-interface IInterceptorsSet {
-  request: {
-    pre: AmauiSubscription;
-    post: AmauiSubscription;
-  };
-  response: {
-    success: AmauiSubscription;
-    error: AmauiSubscription;
-    fail: AmauiSubscription;
-  };
+export interface IInterceptorsSetRequest {
+  pre: AmauiSubscription;
+  post: AmauiSubscription;
+}
+
+export interface IInterceptorsSetResponse {
+  success: AmauiSubscription;
+  error: AmauiSubscription;
+  fail: AmauiSubscription;
+}
+
+export interface IInterceptorsSet {
+  request: IInterceptorsSetRequest;
+  response: IInterceptorsSetResponse;
 }
 
 export interface IOptionsRequest extends IOptions {
@@ -69,46 +73,59 @@ export class AmauiRequestResponse implements IAmauiRequestResponse {
 
 }
 
+export interface IOptionsZipAmaui {
+  zip?: boolean;
+  unzip?: boolean;
+  only_positive?: boolean;
+}
+
+export interface IOptionsZip {
+  amaui?: IOptionsZipAmaui;
+}
+
+export interface IOptionsCsrf {
+  cookie?: string;
+  headers?: string;
+}
+
+export interface IOptionsAgents {
+  http?: http.Agent,
+  https?: https.Agent,
+}
+
+export interface IOptionsRequest {
+  url?: string;
+
+  withCredentials?: boolean;
+
+  headers?: Record<string, string | number>;
+
+  zip?: IOptionsZip;
+
+  csrf?: IOptionsCsrf;
+
+  agents?: IOptionsAgents;
+
+  timeout?: number;
+}
+
+export interface IOptionsResponseParse {
+  json?: boolean;
+}
+
+export interface IOptionsResponse {
+  pure?: boolean;
+
+  resolveOnError?: boolean;
+
+  type?: TResponseType | TResponseTypeNode;
+
+  parse?: IOptionsResponseParse;
+}
+
 export interface IOptions {
-  request?: {
-    url?: string;
-
-    withCredentials?: boolean;
-
-    headers?: Record<string, string | number>;
-
-    zip?: {
-      amaui?: {
-        zip?: boolean;
-        unzip?: boolean;
-        only_positive?: boolean;
-      };
-    };
-
-    csrf?: {
-      cookie?: string;
-      headers?: string;
-    };
-
-    agents?: {
-      http?: http.Agent,
-      https?: https.Agent,
-    };
-
-    timeout?: number;
-  };
-
-  response?: {
-    pure?: boolean;
-
-    resolveOnError?: boolean;
-
-    type?: TResponseType | TResponseTypeNode;
-
-    parse?: {
-      json?: boolean;
-    };
-  };
+  request?: IOptionsRequest;
+  response?: IOptionsResponse;
 }
 
 const optionsDefault: IOptions = {};

@@ -1,1 +1,1 @@
-export { default } from './amaui-request';
+export { default } from './AmauiRequest';
