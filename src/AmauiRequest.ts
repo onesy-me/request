@@ -134,21 +134,21 @@ export const AmauiRequestDefaults: TAmauiRequestDefaults = {
   request: {
     request: {
       headers: {
-        'accept': 'application/json, text/plain, */*',
+        'accept': 'application/json, text/plain, */*'
       },
 
       zip: {
         amaui: {
           zip: false,
           unzip: true,
-          only_positive: true,
-        },
+          only_positive: true
+        }
       },
 
       csrf: {
         cookie: 'CSRF-TOKEN',
-        headers: 'X-CSRF-TOKEN',
-      },
+        headers: 'X-CSRF-TOKEN'
+      }
     },
 
     response: {
@@ -157,35 +157,35 @@ export const AmauiRequestDefaults: TAmauiRequestDefaults = {
       type: 'json',
 
       parse: {
-        json: true,
-      },
-    },
+        json: true
+      }
+    }
   },
   get: {},
   post: {
     request: {
       headers: {
-        'content-type': 'application/json',
-      },
-    },
+        'content-type': 'application/json'
+      }
+    }
   },
   put: {
     request: {
       headers: {
-        'content-type': 'application/json',
-      },
-    },
+        'content-type': 'application/json'
+      }
+    }
   },
   patch: {
     request: {
       headers: {
-        'content-type': 'application/json',
-      },
-    },
+        'content-type': 'application/json'
+      }
+    }
   },
   delete: {},
   head: {},
-  options: {},
+  options: {}
 };
 
 interface IAmauiRequestAmauiSub extends AmauiSubscription {
