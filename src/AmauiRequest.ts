@@ -94,8 +94,6 @@ export interface IOptionsAgents {
 }
 
 export interface IOptionsRequest {
-  url?: string;
-
   withCredentials?: boolean;
 
   headers?: Record<string, string | number>;
@@ -200,25 +198,25 @@ class AmauiRequest {
   public interceptors: IInterceptorsSet = {
     request: {
       pre: new AmauiSubscription(),
-      post: new AmauiSubscription(),
+      post: new AmauiSubscription()
     },
     response: {
       success: new AmauiSubscription(),
       error: new AmauiSubscription(),
-      fail: new AmauiSubscription(),
-    },
+      fail: new AmauiSubscription()
+    }
   };
 
   public static interceptors: IInterceptorsSet = {
     request: {
       pre: new AmauiSubscription(),
-      post: new AmauiSubscription(),
+      post: new AmauiSubscription()
     },
     response: {
       success: new AmauiSubscription(),
       error: new AmauiSubscription(),
-      fail: new AmauiSubscription(),
-    },
+      fail: new AmauiSubscription()
+    }
   };
   public static defaults: TAmauiRequestDefaults = copy(AmauiRequestDefaults);
 
@@ -231,7 +229,7 @@ class AmauiRequest {
     return amauiSubscription as IAmauiRequestAmauiSub;
   }
 
-  public static get amauirequest(): AmauiRequest { return new AmauiRequest(); }
+  public static get amauiRequest(): AmauiRequest { return new AmauiRequest(); }
 
   public static request(...args: [IOptionsRequest]) { return new AmauiRequest().request(...args); }
 

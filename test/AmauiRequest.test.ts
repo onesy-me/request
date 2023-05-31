@@ -60,9 +60,9 @@ group('AmauiRequest', () => {
       fail: [],
     };
 
-    to('amauirequest', async () => {
+    to('amauiRequest', async () => {
       const values_ = [
-        AmauiRequest.amauirequest instanceof AmauiRequest,
+        AmauiRequest.amauiRequest instanceof AmauiRequest,
       ];
 
       const valueBrowsers = await evaluate((window: any) => [
