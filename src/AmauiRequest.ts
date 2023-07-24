@@ -43,6 +43,8 @@ export interface IInterceptorsSet {
 
 export interface IOptionsRequest extends IOptions {
   url?: string;
+  urlStart?: string;
+  urlEnd?: string;
   method?: TMethodType;
   body?: TBody;
 
@@ -128,7 +130,7 @@ export interface IOptions {
 
 const optionsDefault: IOptions = {};
 
-type TAmauiRequestDefaults = Record<string, IOptions>;
+type TAmauiRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options', IOptions>;
 
 export const AmauiRequestDefaults: TAmauiRequestDefaults = {
   request: {
@@ -256,10 +258,13 @@ class AmauiRequest {
     this.options_ = merge(options, optionsDefault, { copy: true });
   }
 
-  public request(options: IOptionsRequest): Promise<IAmauiRequestResponse> {
-    let options_ = merge(options, this.options_, { copy: true });
+  public request(options_: IOptionsRequest): Promise<IAmauiRequestResponse> {
+    let options = merge(options_, this.options_, { copy: true });
 
-    options_ = merge(options_, AmauiRequest.defaults.request, { copy: true });
+    options = merge(options, AmauiRequest.defaults.request, { copy: true });
+
+    // url
+    options.url = this.url(options);
 
     if (
       isValid('http-method', options.method) &&
@@ -718,6 +723,13 @@ class AmauiRequest {
       // For testing purposes only
       global.amauiEvents.emit('amaui-request-sent');
     });
+  }
+
+  private url(options: IOptionsRequest) {
+    const start = options.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart;
+    const end = options.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd;
+
+    return `${start || ''}${options.url}${end || ''}`;
   }
 }
 
