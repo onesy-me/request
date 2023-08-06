@@ -623,6 +623,9 @@ class AmauiRequest {
       };
 
       if (url.pathname) optionsRequest.path = url.pathname;
+
+      if (url.search) optionsRequest.path += url.search;
+
       if (url.port) optionsRequest.port = url.port;
 
       optionsRequest.timeout = timeout || 0;
