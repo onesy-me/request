@@ -254,7 +254,7 @@ class AmauiRequest {
     this.defaults = copy(AmauiRequestDefaults);
   }
 
-  constructor(options: IOptions = optionsDefault) {
+  public constructor(options: IOptions = optionsDefault) {
     this.options_ = merge(options, optionsDefault, { copy: true });
   }
 
@@ -726,8 +726,8 @@ class AmauiRequest {
   }
 
   private url(options: IOptionsRequest) {
-    const start = options.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart;
-    const end = options.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd;
+    const start = options.request.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart;
+    const end = options.request.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd;
 
     return `${start || ''}${options.url}${end || ''}`;
   }
