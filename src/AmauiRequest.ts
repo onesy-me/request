@@ -508,7 +508,13 @@ class AmauiRequest {
       };
 
       // Body
-      if (body instanceof FormData) delete headers['content-type'];
+      // In form data use case
+      // browser sets their own multipart headers boundary
+      if (body instanceof FormData) {
+        Object.keys(headers).forEach(item => {
+          if (item.toLowerCase() === 'content-type') delete headers[item];
+        });
+      }
 
       if ([undefined, null].indexOf(body) === -1) {
         // Zip
@@ -530,6 +536,7 @@ class AmauiRequest {
 
         if (
           !is('string', body) &&
+          !(body instanceof FormData) &&
           (
             is('simple', body) ||
             is('object', body) ||
