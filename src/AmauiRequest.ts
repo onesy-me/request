@@ -41,6 +41,16 @@ export interface IInterceptorsSet {
   response: IInterceptorsSetResponse;
 }
 
+export interface IRequestProperties {
+  url?: string;
+  urlStart?: string;
+  urlEnd?: string;
+  method?: TMethodType;
+  body?: TBody;
+
+  cancel?: AmauiSubscription;
+}
+
 export interface IOptionsRequest extends IOptions {
   url?: string;
   urlStart?: string;
@@ -95,7 +105,7 @@ export interface IOptionsAgents {
   https?: https.Agent,
 }
 
-export interface IOptionsRequest {
+export interface IOptionsRequestOptions extends IRequestProperties {
   withCredentials?: boolean;
 
   headers?: Record<string, string | number>;
@@ -113,7 +123,7 @@ export interface IOptionsResponseParse {
   json?: boolean;
 }
 
-export interface IOptionsResponse {
+export interface IOptionsResponseOptions {
   pure?: boolean;
 
   resolveOnError?: boolean;
@@ -124,13 +134,13 @@ export interface IOptionsResponse {
 }
 
 export interface IOptions {
-  request?: IOptionsRequest;
-  response?: IOptionsResponse;
+  request?: IOptionsRequestOptions;
+  response?: IOptionsResponseOptions;
 }
 
 const optionsDefault: IOptions = {};
 
-type TAmauiRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options', IOptions>;
+type TAmauiRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options', IOptionsRequest>;
 
 export const AmauiRequestDefaults: TAmauiRequestDefaults = {
   request: {
@@ -729,8 +739,17 @@ class AmauiRequest {
   }
 
   private url(options: IOptionsRequest) {
-    const start = options.request.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart;
-    const end = options.request.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd;
+    const start = (
+      options.urlStart || options.request.urlStart ||
+      AmauiRequest.defaults[(options.method || '').toLowerCase()]?.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart ||
+      AmauiRequest.defaults.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart
+    );
+
+    const end = (
+      options.urlEnd || options.request.urlEnd ||
+      AmauiRequest.defaults[(options.method || '').toLowerCase()]?.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd ||
+      AmauiRequest.defaults.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd
+    );
 
     return `${start || ''}${options.url}${end || ''}`;
   }
