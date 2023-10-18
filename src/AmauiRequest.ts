@@ -201,7 +201,7 @@ export const AmauiRequestDefaults: TAmauiRequestDefaults = {
 };
 
 interface IAmauiRequestAmauiSub extends AmauiSubscription {
-  cancel?(): void;
+  cancel?(...args: any[]): void;
 }
 
 class AmauiRequest {
