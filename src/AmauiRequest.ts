@@ -273,6 +273,10 @@ class AmauiRequest {
 
     options = merge(options, AmauiRequest.defaults.request, { copy: true });
 
+    const optionsMethodDefault = AmauiRequest.defaults[options.method?.toLowerCase()];
+
+    if (optionsMethodDefault) options = merge(options, optionsMethodDefault, { copy: true });
+
     // url
     options.url = this.url(options);
 

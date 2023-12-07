@@ -1,6 +1,6 @@
 {
   "name": "@amaui/request",
-  "version": "1.1.5",
+  "version": "1.1.7",
   "description": "Requests client for browser and nodejs",
   "repository": "https://github.com/amaui-org/amaui-request.git",
   "author": "Lazar <lazareric.com@gmail.com>",
