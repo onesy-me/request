@@ -1,6 +1,6 @@
 {
   "name": "@onesy/request",
-  "version": "1.1.7",
+  "version": "1.0.0",
   "description": "Requests client for browser and nodejs",
   "repository": "https://github.com/onesy-org/onesy-request.git",
   "author": "Lazar <lazareric.com@gmail.com>",
@@ -31,6 +31,7 @@
     "prebuild": "rimraf build",
     "build": "node utils/js/build.js",
     "release": "yarn build && yarn version --patch --no-git-tag-version && yarn build && cd ./build && npm publish",
+    "release-pure": "yarn build && yarn build && cd ./build && npm publish",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "type": "tsc --noEmit -p tsconfig.json",
     "cov": "cross-env NODE_ENV=test onesy-test",
@@ -39,18 +40,18 @@
     "test": "yarn lint && yarn type && yarn build && yarn test:pre && yarn cov && yarn test:post"
   },
   "dependencies": {
-    "@onesy/cookie": "^1.0.11141",
-    "@onesy/huffman-code": "^1.0.3",
-    "@onesy/lz77": "^1.0.3",
-    "@onesy/subscription": "^1.0.5",
-    "@onesy/utils": "^1.1.17",
-    "@onesy/zip": "^1.0.4",
+    "@onesy/cookie": "^1.0.0",
+    "@onesy/huffman-code": "^1.0.0",
+    "@onesy/lz77": "^1.0.0",
+    "@onesy/subscription": "^1.0.0",
+    "@onesy/utils": "^1.0.0",
+    "@onesy/zip": "^1.0.0",
     "@babel/runtime": "^7.18.3"
   },
   "devDependencies": {
-    "@onesy/models": "^1.0.11114",
-    "@onesy/node": "^1.0.11117",
-    "@onesy/test": "^1.0.11117",
+    "@onesy/models": "^1.0.0",
+    "@onesy/node": "^1.0.0",
+    "@onesy/test": "^1.0.0",
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/plugin-proposal-class-properties": "^7.17.12",
