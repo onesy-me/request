@@ -31,7 +31,7 @@ npm manifest:
     "name": "@onesy/request",
     "version": "1.0.11150",
     "description": "Requests client for browser and nodejs",
-    "repository": "https://github.com/onesy-org/onesy-request.git",
+    "repository": "https://github.com/onesy-me/request.git",
     "author": "Lazar <lazareric.com@gmail.com>",
     "license": "MIT",
     "private": false,
