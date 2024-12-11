@@ -4,11 +4,11 @@
 
 <p align='center'>
   <a target='_blank' rel='noopener noreferrer' href='#'>
-    <img src='utils/images/logo.svg' alt='amaui logo' />
+    <img src='utils/images/logo.svg' alt='onesy logo' />
   </a>
 </p>
 
-<h1 align='center'>amaui Request</h1>
+<h1 align='center'>onesy Request</h1>
 
 <p align='center'>
   Request
@@ -39,21 +39,21 @@
 ### Add
 
 ```sh
-yarn add @amaui/request
+yarn add @onesy/request
 ```
 
 ### Use
 
 ```javascript
-  import AmauiRequest from '@amaui/request';
+  import OnesyRequest from '@onesy/request';
 
-  // Make a new AmauiRequest instance
-  const amauiRequest = new AmauiRequest();
+  // Make a new OnesyRequest instance
+  const onesyRequest = new OnesyRequest();
 
-  await amauiRequest.get('https://jsonplaceholder.typicode.com/posts/4');
+  await onesyRequest.get('https://jsonplaceholder.typicode.com/posts/4');
 
   // or as a static method without a new instance
-  await AmauiRequest.get('https://jsonplaceholder.typicode.com/posts/4');
+  await OnesyRequest.get('https://jsonplaceholder.typicode.com/posts/4');
 
   // {
   //     response: {

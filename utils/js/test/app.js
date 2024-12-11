@@ -6,9 +6,9 @@ const express = require('express');
 const cors = require('cors');
 const formidable = require('formidable');
 
-const AmauiUtils = require('@amaui/utils');
-const AmauiZip = require('@amaui/zip').default;
-const AmauiNode = require('@amaui/node').default;
+const OnesyUtils = require('@onesy/utils');
+const OnesyZip = require('@onesy/zip').default;
+const OnesyNode = require('@onesy/node').default;
 
 const port = process.env.PORT || 4000;
 
@@ -41,12 +41,12 @@ const run = async () => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.text());
 
-  const amauiUnzip = (req, res, next) => {
+  const onesyUnzip = (req, res, next) => {
     let value = req.body;
 
-    if (AmauiUtils.is('buffer', value)) value = Buffer.from(value).toString('utf-8');
+    if (OnesyUtils.is('buffer', value)) value = Buffer.from(value).toString('utf-8');
 
-    if (req.headers['amaui-encoding'] === 'amaui-zip') value = AmauiZip.decode(value).value;
+    if (req.headers['onesy-encoding'] === 'onesy-zip') value = OnesyZip.decode(value).value;
 
     req.body = value;
 
@@ -54,19 +54,19 @@ const run = async () => {
   };
 
   app.get('/zip', async (req, res) => {
-    res.set('amaui-encoding', 'amaui-zip');
+    res.set('onesy-encoding', 'onesy-zip');
 
-    return res.status(200).send(new AmauiZip({ a: 4 }).response.value);
+    return res.status(200).send(new OnesyZip({ a: 4 }).response.value);
   });
 
-  app.post('/unzip', express.json(), express.raw({ type: '*/*' }), amauiUnzip, async (req, res) => {
+  app.post('/unzip', express.json(), express.raw({ type: '*/*' }), onesyUnzip, async (req, res) => {
     let data = req.body;
 
     const response = {
       data,
       headers: {
         'content-type': req.headers['content-type'],
-        'amaui-encoding': req.headers['amaui-encoding'],
+        'onesy-encoding': req.headers['onesy-encoding'],
       },
     };
 
@@ -85,7 +85,7 @@ const run = async () => {
 
     response.data = {
       fields,
-      file: files?.file?.filepath && await AmauiNode.file.get(files?.file?.filepath, false),
+      file: files?.file?.filepath && await OnesyNode.file.get(files?.file?.filepath, false),
     };
 
     return res.status(200).json(response);
@@ -94,7 +94,7 @@ const run = async () => {
   app.post('/api', express.json(), express.raw({ type: '*/*' }), async (req, res) => {
     let data = req.body;
 
-    if (AmauiUtils.is('buffer', data)) data = Buffer.from(data).toString('utf-8');
+    if (OnesyUtils.is('buffer', data)) data = Buffer.from(data).toString('utf-8');
 
     const response = {
       variant: req.headers['content-type'],
@@ -108,7 +108,7 @@ const run = async () => {
     const paths = (await fg('build/umd/*.prod.min.js', { onlyFiles: true }));
 
     paths.push(
-      'https://unpkg.com/@amaui/utils@latest/umd/amaui-utils.prod.min.js'
+      'https://unpkg.com/@onesy/utils@latest/umd/onesy-utils.prod.min.js'
     );
 
     let value = `<!DOCTYPE html>

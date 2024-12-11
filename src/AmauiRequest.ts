@@ -1,20 +1,20 @@
 import http from 'http';
 import https from 'https';
 import events from 'events';
-import is from '@amaui/utils/is';
-import isValid from '@amaui/utils/isValid';
-import isEnvironment from '@amaui/utils/isEnvironment';
-import merge from '@amaui/utils/merge';
-import parse from '@amaui/utils/parse';
-import copy from '@amaui/utils/copy';
-import getURL from '@amaui/utils/getURL';
-import serialize from '@amaui/utils/serialize';
-import castParam from '@amaui/utils/castParam';
-import AmauiCookie from '@amaui/cookie';
-import AmauiSubscription from '@amaui/subscription';
-import AmauiZip from '@amaui/zip';
+import is from '@onesy/utils/is';
+import isValid from '@onesy/utils/isValid';
+import isEnvironment from '@onesy/utils/isEnvironment';
+import merge from '@onesy/utils/merge';
+import parse from '@onesy/utils/parse';
+import copy from '@onesy/utils/copy';
+import getURL from '@onesy/utils/getURL';
+import serialize from '@onesy/utils/serialize';
+import castParam from '@onesy/utils/castParam';
+import OnesyCookie from '@onesy/cookie';
+import OnesySubscription from '@onesy/subscription';
+import OnesyZip from '@onesy/zip';
 
-if (isEnvironment('nodejs') && !global.amauiEvents) global.amauiEvents = new events.EventEmitter();
+if (isEnvironment('nodejs') && !global.onesyEvents) global.onesyEvents = new events.EventEmitter();
 
 export type TMethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
@@ -26,14 +26,14 @@ export type TBody = Blob | BufferSource | FormData | URLSearchParams | Record<an
 export type TXhrEvent = ProgressEvent<EventTarget>;
 
 export interface IInterceptorsSetRequest {
-  pre: AmauiSubscription;
-  post: AmauiSubscription;
+  pre: OnesySubscription;
+  post: OnesySubscription;
 }
 
 export interface IInterceptorsSetResponse {
-  success: AmauiSubscription;
-  error: AmauiSubscription;
-  fail: AmauiSubscription;
+  success: OnesySubscription;
+  error: OnesySubscription;
+  fail: OnesySubscription;
 }
 
 export interface IInterceptorsSet {
@@ -48,7 +48,7 @@ export interface IRequestProperties {
   method?: TMethodType;
   body?: TBody;
 
-  cancel?: AmauiSubscription;
+  cancel?: OnesySubscription;
 }
 
 export interface IOptionsRequest extends IOptions {
@@ -58,14 +58,14 @@ export interface IOptionsRequest extends IOptions {
   method?: TMethodType;
   body?: TBody;
 
-  cancel?: AmauiSubscription;
+  cancel?: OnesySubscription;
 }
 
 const optionsRequestDefault: IOptionsRequest = {
   method: 'GET',
 };
 
-export interface IAmauiRequestResponse {
+export interface IOnesyRequestResponse {
   response: any;
   status: number;
   headers: object;
@@ -73,7 +73,7 @@ export interface IAmauiRequestResponse {
   options: IOptionsRequest;
 }
 
-export class AmauiRequestResponse implements IAmauiRequestResponse {
+export class OnesyRequestResponse implements IOnesyRequestResponse {
 
   constructor(
     public response: any,
@@ -85,14 +85,14 @@ export class AmauiRequestResponse implements IAmauiRequestResponse {
 
 }
 
-export interface IOptionsZipAmaui {
+export interface IOptionsZipOnesy {
   zip?: boolean;
   unzip?: boolean;
   only_positive?: boolean;
 }
 
 export interface IOptionsZip {
-  amaui?: IOptionsZipAmaui;
+  onesy?: IOptionsZipOnesy;
 }
 
 export interface IOptionsCsrf {
@@ -140,9 +140,9 @@ export interface IOptions {
 
 const optionsDefault: IOptions = {};
 
-type TAmauiRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options', IOptionsRequest>;
+type TOnesyRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options', IOptionsRequest>;
 
-export const AmauiRequestDefaults: TAmauiRequestDefaults = {
+export const OnesyRequestDefaults: TOnesyRequestDefaults = {
   request: {
     request: {
       headers: {
@@ -150,7 +150,7 @@ export const AmauiRequestDefaults: TAmauiRequestDefaults = {
       },
 
       zip: {
-        amaui: {
+        onesy: {
           zip: false,
           unzip: true,
           only_positive: true
@@ -200,80 +200,80 @@ export const AmauiRequestDefaults: TAmauiRequestDefaults = {
   options: {}
 };
 
-interface IAmauiRequestAmauiSub extends AmauiSubscription {
+interface IOnesyRequestOnesySub extends OnesySubscription {
   cancel?(...args: any[]): void;
 }
 
-class AmauiRequest {
+class OnesyRequest {
   private options_: IOptions;
 
   public interceptors: IInterceptorsSet = {
     request: {
-      pre: new AmauiSubscription(),
-      post: new AmauiSubscription()
+      pre: new OnesySubscription(),
+      post: new OnesySubscription()
     },
     response: {
-      success: new AmauiSubscription(),
-      error: new AmauiSubscription(),
-      fail: new AmauiSubscription()
+      success: new OnesySubscription(),
+      error: new OnesySubscription(),
+      fail: new OnesySubscription()
     }
   };
 
   public static interceptors: IInterceptorsSet = {
     request: {
-      pre: new AmauiSubscription(),
-      post: new AmauiSubscription()
+      pre: new OnesySubscription(),
+      post: new OnesySubscription()
     },
     response: {
-      success: new AmauiSubscription(),
-      error: new AmauiSubscription(),
-      fail: new AmauiSubscription()
+      success: new OnesySubscription(),
+      error: new OnesySubscription(),
+      fail: new OnesySubscription()
     }
   };
-  public static defaults: TAmauiRequestDefaults = copy(AmauiRequestDefaults);
+  public static defaults: TOnesyRequestDefaults = copy(OnesyRequestDefaults);
 
-  public static get cancel(): IAmauiRequestAmauiSub {
-    const amauiSubscription: IAmauiRequestAmauiSub = new AmauiSubscription();
+  public static get cancel(): IOnesyRequestOnesySub {
+    const onesySubscription: IOnesyRequestOnesySub = new OnesySubscription();
 
     // Add a custom cancel method for this use case
-    amauiSubscription.cancel = amauiSubscription.emit;
+    onesySubscription.cancel = onesySubscription.emit;
 
-    return amauiSubscription as IAmauiRequestAmauiSub;
+    return onesySubscription as IOnesyRequestOnesySub;
   }
 
-  public static get amauiRequest(): AmauiRequest { return new AmauiRequest(); }
+  public static get onesyRequest(): OnesyRequest { return new OnesyRequest(); }
 
-  public static request(...args: [IOptionsRequest]) { return new AmauiRequest().request(...args); }
+  public static request(...args: [IOptionsRequest]) { return new OnesyRequest().request(...args); }
 
-  public static get(...args: [string, IOptionsRequest?]) { return new AmauiRequest().get(...args); }
+  public static get(...args: [string, IOptionsRequest?]) { return new OnesyRequest().get(...args); }
 
-  public static post(...args: [string, TBody, IOptionsRequest?]) { return new AmauiRequest().post(...args); }
+  public static post(...args: [string, TBody, IOptionsRequest?]) { return new OnesyRequest().post(...args); }
 
-  public static put(...args: [string, TBody, IOptionsRequest?]) { return new AmauiRequest().put(...args); }
+  public static put(...args: [string, TBody, IOptionsRequest?]) { return new OnesyRequest().put(...args); }
 
-  public static delete(...args: [string, IOptionsRequest?]) { return new AmauiRequest().delete(...args); }
+  public static delete(...args: [string, IOptionsRequest?]) { return new OnesyRequest().delete(...args); }
 
-  public static head(...args: [string, IOptionsRequest?]) { return new AmauiRequest().head(...args); }
+  public static head(...args: [string, IOptionsRequest?]) { return new OnesyRequest().head(...args); }
 
-  public static options(...args: [string, IOptionsRequest?]) { return new AmauiRequest().options(...args); }
+  public static options(...args: [string, IOptionsRequest?]) { return new OnesyRequest().options(...args); }
 
-  public static patch(...args: [string, TBody, IOptionsRequest?]) { return new AmauiRequest().patch(...args); }
+  public static patch(...args: [string, TBody, IOptionsRequest?]) { return new OnesyRequest().patch(...args); }
 
   // Mostly for testing purposes
   public static reset() {
-    this.defaults = copy(AmauiRequestDefaults);
+    this.defaults = copy(OnesyRequestDefaults);
   }
 
   public constructor(options: IOptions = optionsDefault) {
     this.options_ = merge(options, optionsDefault, { copy: true });
   }
 
-  public request(options_: IOptionsRequest): Promise<IAmauiRequestResponse> {
+  public request(options_: IOptionsRequest): Promise<IOnesyRequestResponse> {
     let options = merge(options_, this.options_, { copy: true });
 
-    options = merge(options, AmauiRequest.defaults.request, { copy: true });
+    options = merge(options, OnesyRequest.defaults.request, { copy: true });
 
-    const optionsMethodDefault = AmauiRequest.defaults[options.method?.toLowerCase()];
+    const optionsMethodDefault = OnesyRequest.defaults[options.method?.toLowerCase()];
 
     if (optionsMethodDefault) options = merge(options, optionsMethodDefault, { copy: true });
 
@@ -294,7 +294,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.get, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.get, { copy: true }));
   }
 
   public post(url: string, body: TBody, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -304,7 +304,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.post, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.post, { copy: true }));
   }
 
   public put(url: string, body: TBody, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -314,7 +314,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.put, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.put, { copy: true }));
   }
 
   public patch(url: string, body: TBody, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -324,7 +324,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.patch, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.patch, { copy: true }));
   }
 
   public head(url: string, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -333,7 +333,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.head, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.head, { copy: true }));
   }
 
   public options(url: string, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -342,7 +342,7 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.options, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.options, { copy: true }));
   }
 
   public delete(url: string, options: IOptionsRequest = copy(optionsRequestDefault)) {
@@ -351,33 +351,33 @@ class AmauiRequest {
 
     const options_ = merge(options, this.options_, { copy: true });
 
-    return this.request(merge(options_, AmauiRequest.defaults.delete, { copy: true }));
+    return this.request(merge(options_, OnesyRequest.defaults.delete, { copy: true }));
   }
 
   private async onPre(value: IOptionsRequest) {
     for (const method of this.interceptors.request.pre.methods) await method(value);
 
-    for (const method of AmauiRequest.interceptors.request.pre.methods) await method(value);
+    for (const method of OnesyRequest.interceptors.request.pre.methods) await method(value);
   }
 
   private async onPost(value: TXhrEvent | http.IncomingMessage) {
     for (const method of this.interceptors.request.post.methods) await method(value);
 
-    for (const method of AmauiRequest.interceptors.request.post.methods) await method(value);
+    for (const method of OnesyRequest.interceptors.request.post.methods) await method(value);
   }
 
-  private async onSuccess(value: AmauiRequestResponse, done: () => Promise<void>) {
+  private async onSuccess(value: OnesyRequestResponse, done: () => Promise<void>) {
     for (const method of this.interceptors.response.success.methods) await method(value);
 
-    for (const method of AmauiRequest.interceptors.response.success.methods) await method(value);
+    for (const method of OnesyRequest.interceptors.response.success.methods) await method(value);
 
     if (done) await done();
   }
 
-  private async onError(value: AmauiRequestResponse, done: () => Promise<void>) {
+  private async onError(value: OnesyRequestResponse, done: () => Promise<void>) {
     for (const method of this.interceptors.response.error.methods) await method(value);
 
-    for (const method of AmauiRequest.interceptors.response.error.methods) await method(value);
+    for (const method of OnesyRequest.interceptors.response.error.methods) await method(value);
 
     if (done) await done();
   }
@@ -385,7 +385,7 @@ class AmauiRequest {
   private async onFail(value: { event: TXhrEvent | Event, type: string }, done: () => Promise<void>) {
     for (const method of this.interceptors.response.fail.methods) await method(value);
 
-    for (const method of AmauiRequest.interceptors.response.fail.methods) await method(value);
+    for (const method of OnesyRequest.interceptors.response.fail.methods) await method(value);
 
     if (done) await done();
   }
@@ -405,7 +405,7 @@ class AmauiRequest {
     return result;
   }
 
-  private xhr(options: IOptionsRequest = {}): Promise<IAmauiRequestResponse> {
+  private xhr(options: IOptionsRequest = {}): Promise<IOnesyRequestResponse> {
     return new Promise(async (resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
@@ -424,7 +424,7 @@ class AmauiRequest {
 
       // CSRF
       if (withCredentials || isValid('same-origin', url)) {
-        const csrfValue = new AmauiCookie().get(csrf.cookie);
+        const csrfValue = new OnesyCookie().get(csrf.cookie);
 
         if (csrfValue && csrf.headers) headers[csrf.headers] = csrfValue;
       }
@@ -458,9 +458,9 @@ class AmauiRequest {
 
         let response = [undefined, '', 'text'].indexOf(typeOptions) > -1 ? xhr.responseText : xhr.response;
 
-        if (responseHeaders['amaui-encoding'] === 'amaui-zip' && requestOptions.zip?.amaui?.unzip) {
+        if (responseHeaders['onesy-encoding'] === 'onesy-zip' && requestOptions.zip?.onesy?.unzip) {
 
-          const unzipped = AmauiZip.decode(response);
+          const unzipped = OnesyZip.decode(response);
 
           response = unzipped.value;
         }
@@ -472,7 +472,7 @@ class AmauiRequest {
           ) response = parse(response);
         }
 
-        const response_ = new AmauiRequestResponse(
+        const response_ = new OnesyRequestResponse(
           response,
           xhr.status,
           responseHeaders,
@@ -497,7 +497,7 @@ class AmauiRequest {
       };
 
       const onFail = (type: string) => async (event: Event) => {
-        const response = new AmauiRequestResponse(
+        const response = new OnesyRequestResponse(
           undefined,
           xhr.status,
           this.parseHeaders(xhr.getAllResponseHeaders()),
@@ -522,17 +522,17 @@ class AmauiRequest {
 
       if ([undefined, null].indexOf(body) === -1) {
         // Zip
-        if (requestOptions.zip?.amaui?.zip) {
-          const zipped = new AmauiZip(body);
+        if (requestOptions.zip?.onesy?.zip) {
+          const zipped = new OnesyZip(body);
 
-          if (zipped.response.positive || !requestOptions.zip?.amaui?.only_positive) {
+          if (zipped.response.positive || !requestOptions.zip?.onesy?.only_positive) {
             body = zipped.response.value;
 
-            headers['amaui-encoding'] = 'amaui-zip';
+            headers['onesy-encoding'] = 'onesy-zip';
             // As it will mostly make an issue
             // with middlewares handling ie. application/json parsing based
             // on content-type value, as on the other end
-            // AmauiZip when decoding a value, will parse it back
+            // OnesyZip when decoding a value, will parse it back
             // to value's original value type either way
             headers['content-type'] = 'text/plain';
           }
@@ -571,11 +571,11 @@ class AmauiRequest {
       xhr.send(body as any);
 
       // For testing purposes only
-      window.dispatchEvent(new CustomEvent('amaui-request-sent'));
+      window.dispatchEvent(new CustomEvent('onesy-request-sent'));
     });
   }
 
-  private https(options: IOptionsRequest = {}): Promise<IAmauiRequestResponse> {
+  private https(options: IOptionsRequest = {}): Promise<IOnesyRequestResponse> {
     return new Promise(async (resolve, reject) => {
       // Run request pre interceptors
       // Each method is provided with options object as a reference
@@ -589,7 +589,7 @@ class AmauiRequest {
       const headersNamesNormalized = Object.keys(headers).map(key => key.toLowerCase());
 
       // User agent value add optionally
-      if (headersNamesNormalized.indexOf('user-agent') === -1) headers['user-agent'] = `AmauiRequest/1.0.0`;
+      if (headersNamesNormalized.indexOf('user-agent') === -1) headers['user-agent'] = `OnesyRequest/1.0.0`;
 
       const url = new URL(getURL(urlOptions));
 
@@ -598,17 +598,17 @@ class AmauiRequest {
       // Body
       if (body !== undefined) {
         // Zip
-        if (requestOptions.zip?.amaui?.zip) {
-          const zipped = new AmauiZip(body);
+        if (requestOptions.zip?.onesy?.zip) {
+          const zipped = new OnesyZip(body);
 
-          if (zipped.response.positive || !requestOptions.zip?.amaui?.only_positive) {
+          if (zipped.response.positive || !requestOptions.zip?.onesy?.only_positive) {
             body = zipped.response.value;
 
-            headers['amaui-encoding'] = 'amaui-zip';
+            headers['onesy-encoding'] = 'onesy-zip';
             // As it will mostly make an issue
             // with middlewares handling ie. application/json parsing based
             // on content-type value, as on the other end
-            // AmauiZip when decoding a value, will parse it back
+            // OnesyZip when decoding a value, will parse it back
             // to value's original value type either way
             headers['content-type'] = 'text/plain';
           }
@@ -664,8 +664,8 @@ class AmauiRequest {
         res.on('end', async () => {
           let response: Buffer | string = Buffer.concat(responseBufferArray);
 
-          if (res.headers['amaui-encoding'] === 'amaui-zip' && requestOptions.zip?.amaui?.unzip) {
-            const unzipped = AmauiZip.decode(response.toString('binary'));
+          if (res.headers['onesy-encoding'] === 'onesy-zip' && requestOptions.zip?.onesy?.unzip) {
+            const unzipped = OnesyZip.decode(response.toString('binary'));
 
             response = unzipped.value;
           }
@@ -678,7 +678,7 @@ class AmauiRequest {
             ) response = parse(response);
           }
 
-          const response_ = new AmauiRequestResponse(
+          const response_ = new OnesyRequestResponse(
             response,
             res.statusCode,
             res.headers,
@@ -717,7 +717,7 @@ class AmauiRequest {
       };
 
       const onFail = (type: string) => async (event?: Event) => {
-        const response = new AmauiRequestResponse(
+        const response = new OnesyRequestResponse(
           undefined,
           undefined,
           headers,
@@ -745,25 +745,25 @@ class AmauiRequest {
       request.end(body);
 
       // For testing purposes only
-      global.amauiEvents.emit('amaui-request-sent');
+      global.onesyEvents.emit('onesy-request-sent');
     });
   }
 
   private url(options: IOptionsRequest) {
     const start = (
       options.urlStart || options.request.urlStart ||
-      AmauiRequest.defaults[(options.method || '').toLowerCase()]?.urlStart || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart ||
-      AmauiRequest.defaults.request?.urlStart || AmauiRequest.defaults.request?.request?.urlStart
+      OnesyRequest.defaults[(options.method || '').toLowerCase()]?.urlStart || OnesyRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlStart ||
+      OnesyRequest.defaults.request?.urlStart || OnesyRequest.defaults.request?.request?.urlStart
     );
 
     const end = (
       options.urlEnd || options.request.urlEnd ||
-      AmauiRequest.defaults[(options.method || '').toLowerCase()]?.urlEnd || AmauiRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd ||
-      AmauiRequest.defaults.request?.urlEnd || AmauiRequest.defaults.request?.request?.urlEnd
+      OnesyRequest.defaults[(options.method || '').toLowerCase()]?.urlEnd || OnesyRequest.defaults[(options.method || '').toLowerCase()]?.request?.urlEnd ||
+      OnesyRequest.defaults.request?.urlEnd || OnesyRequest.defaults.request?.request?.urlEnd
     );
 
     return `${start || ''}${options.url}${end || ''}`;
   }
 }
 
-export default AmauiRequest;
+export default OnesyRequest;

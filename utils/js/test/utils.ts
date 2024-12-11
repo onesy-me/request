@@ -1,9 +1,9 @@
 /* tslint:disable: no-shadowed-variable */
 import playwright, { chromium, webkit, firefox } from 'playwright';
 
-import { TMethod } from '@amaui/models';
+import { TMethod } from '@onesy/models';
 
-import AmauiRequest from '../../../src';
+import OnesyRequest from '../../../src';
 
 export type TType = 'chromium' | 'firefox' | 'webkit';
 
@@ -198,7 +198,7 @@ export const utils: IUtils = {};
 preAll(async () => utils.browsers = await startBrowsers());
 
 preEveryTo(() => {
-  AmauiRequest.reset();
+  OnesyRequest.reset();
 });
 
 postAll(async () => await closeBrowsers(utils.browsers as IBrowsers));

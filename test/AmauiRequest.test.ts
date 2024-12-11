@@ -5,28 +5,28 @@ import https from 'https';
 import FormData from 'form-data';
 import events from 'events';
 
-import { assert } from '@amaui/test';
-import { wait } from '@amaui/utils';
-import AmauiNode from '@amaui/node';
+import { assert } from '@onesy/test';
+import { wait } from '@onesy/utils';
+import OnesyNode from '@onesy/node';
 
 import { evaluate, evaluateBrowser, utils } from '../utils/js/test/utils';
 
-import AmauiRequest from '../src';
-import { AmauiRequestResponse } from '../src/AmauiRequest';
+import OnesyRequest from '../src';
+import { OnesyRequestResponse } from '../src/OnesyRequest';
 
-if (!global.amauiEvents) global.amauiEvents = new events.EventEmitter();
+if (!global.onesyEvents) global.onesyEvents = new events.EventEmitter();
 
-group('AmauiRequest', () => {
+group('OnesyRequest', () => {
   const filePath = path.resolve(__dirname, '../LICENSE');
 
   preEveryGroupTo(async () => {
-    AmauiRequest.reset();
+    OnesyRequest.reset();
   });
 
   group('AmaRequestResponse', () => {
 
     to('AmaRequestResponse', () => {
-      const amauiRequestResponse = new AmauiRequestResponse(
+      const onesyRequestResponse = new OnesyRequestResponse(
         'a',
         201,
         { a: 'a' },
@@ -34,7 +34,7 @@ group('AmauiRequest', () => {
         { url: 'a' }
       );
 
-      assert(amauiRequestResponse).eql({
+      assert(onesyRequestResponse).eql({
         response: 'a',
         status: 201,
         headers: {
@@ -51,7 +51,7 @@ group('AmauiRequest', () => {
 
   });
 
-  group('AmauiRequest', () => {
+  group('OnesyRequest', () => {
     const interceptors = {
       pre: [],
       post: [],
@@ -60,13 +60,13 @@ group('AmauiRequest', () => {
       fail: [],
     };
 
-    to('amauiRequest', async () => {
+    to('onesyRequest', async () => {
       const values_ = [
-        AmauiRequest.amauiRequest instanceof AmauiRequest,
+        OnesyRequest.onesyRequest instanceof OnesyRequest,
       ];
 
       const valueBrowsers = await evaluate((window: any) => [
-        window.AmauiRequest.amauirequest instanceof window.AmauiRequest,
+        window.OnesyRequest.onesyrequest instanceof window.OnesyRequest,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -89,26 +89,26 @@ group('AmauiRequest', () => {
         const preMethod2 = method('pre');
 
         // Methods of same ref are not duplicated when subscribing
-        AmauiRequest.interceptors.request.pre.subscribe(preMethod);
-        AmauiRequest.interceptors.request.pre.subscribe(preMethod);
+        OnesyRequest.interceptors.request.pre.subscribe(preMethod);
+        OnesyRequest.interceptors.request.pre.subscribe(preMethod);
 
         // Unsubscribe works properly as well
-        AmauiRequest.interceptors.request.pre.subscribe(preMethod2);
-        AmauiRequest.interceptors.request.pre.unsubscribe(preMethod2);
+        OnesyRequest.interceptors.request.pre.subscribe(preMethod2);
+        OnesyRequest.interceptors.request.pre.unsubscribe(preMethod2);
 
-        AmauiRequest.interceptors.request.post.subscribe(method('post'));
-        AmauiRequest.interceptors.response.success.subscribe(method('success'));
-        AmauiRequest.interceptors.response.error.subscribe(method('error'));
-        AmauiRequest.interceptors.response.fail.subscribe(method('fail'));
+        OnesyRequest.interceptors.request.post.subscribe(method('post'));
+        OnesyRequest.interceptors.response.success.subscribe(method('success'));
+        OnesyRequest.interceptors.response.error.subscribe(method('error'));
+        OnesyRequest.interceptors.response.fail.subscribe(method('fail'));
       });
 
       to('success', async () => {
         const values_ = [
-          (await AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
+          (await OnesyRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
         ];
 
         const valueBrowsers = await evaluate(async (window: any) => [
-          (await window.AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
+          (await window.OnesyRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
         ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
@@ -125,11 +125,11 @@ group('AmauiRequest', () => {
 
       to('error', async () => {
         const values_ = [
-          (await AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/postsa/1' })).status,
+          (await OnesyRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/postsa/1' })).status,
         ];
 
         const valueBrowsers = await evaluate(async (window: any) => [
-          (await window.AmauiRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/postsa/1' })).status,
+          (await window.OnesyRequest.request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/postsa/1' })).status,
         ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
@@ -141,11 +141,11 @@ group('AmauiRequest', () => {
 
       to('fail', async () => {
         const method = new Promise(resolve => {
-          const cancel = AmauiRequest.cancel;
+          const cancel = OnesyRequest.cancel;
 
-          (global.amauiEvents as events.EventEmitter).on('amaui-request-sent', () => cancel.cancel());
+          (global.onesyEvents as events.EventEmitter).on('onesy-request-sent', () => cancel.cancel());
 
-          AmauiRequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
+          OnesyRequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
         });
 
         const values_ = [
@@ -154,11 +154,11 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           const method = new Promise(resolve => {
-            const cancel = window.AmauiRequest.cancel;
+            const cancel = window.OnesyRequest.cancel;
 
-            window.addEventListener('amaui-request-sent', () => cancel.cancel());
+            window.addEventListener('onesy-request-sent', () => cancel.cancel());
 
-            window.AmauiRequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch((error: any) => resolve(error));
+            window.OnesyRequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch((error: any) => resolve(error));
           });
 
           return [
@@ -204,15 +204,15 @@ group('AmauiRequest', () => {
             const valueBrowsers = await evaluate(async (window: any) => {
               window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
 
-              window.AmauiRequest.defaults.request.request.withCredentials = true;
+              window.OnesyRequest.defaults.request.request.withCredentials = true;
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
-              window.AmauiRequest.defaults.request.request.withCredentials = false;
+              window.OnesyRequest.defaults.request.request.withCredentials = false;
 
-              const response1 = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response1 = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return [
                 (response.request as any).headers,
@@ -228,18 +228,18 @@ group('AmauiRequest', () => {
           });
 
           to('headers', async () => {
-            AmauiRequest.defaults.request.request.headers = { 'AMAUI-TOKEN': 'a4' };
+            OnesyRequest.defaults.request.request.headers = { 'AMAUI-TOKEN': 'a4' };
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const values_ = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+            const values_ = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.request.request.headers = { 'AMAUI-TOKEN': 'a4' };
+              window.OnesyRequest.defaults.request.request.headers = { 'AMAUI-TOKEN': 'a4' };
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return (response.request as any).headers;
             });
@@ -251,34 +251,34 @@ group('AmauiRequest', () => {
 
           group('zip', () => {
 
-            group('amaui', () => {
+            group('onesy', () => {
 
               group('zip', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: false } };
+                  OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: false } };
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', true)).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', true)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', true)).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', true)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -287,14 +287,14 @@ group('AmauiRequest', () => {
                       data: 'a',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: 4,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -305,7 +305,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -314,7 +314,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -325,14 +325,14 @@ group('AmauiRequest', () => {
                       ],
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: true,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -343,21 +343,21 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { zip: false, only_positive: false } };
+                  OnesyRequest.defaults.request.request.zip = { onesy: { zip: false, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { zip: false, only_positive: false } };
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { zip: false, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -392,19 +392,19 @@ group('AmauiRequest', () => {
               group('only_positive', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: true } };
+                  OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: true } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: true } };
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: true } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -413,7 +413,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -428,19 +428,19 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: false } };
+                  OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { zip: true, only_positive: false } };
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { zip: true, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -449,7 +449,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -458,7 +458,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     }
                   ]));
@@ -469,19 +469,19 @@ group('AmauiRequest', () => {
               group('unzip', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { unzip: true } };
-                  AmauiRequest.defaults.request.response.type = 'text';
+                  OnesyRequest.defaults.request.request.zip = { onesy: { unzip: true } };
+                  OnesyRequest.defaults.request.response.type = 'text';
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { unzip: true } };
-                    window.AmauiRequest.defaults.request.response.type = 'text';
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { unzip: true } };
+                    window.OnesyRequest.defaults.request.response.type = 'text';
 
                     return [
-                      (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
+                      (await window.OnesyRequest.get('http://localhost:4000/zip')).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.get('http://localhost:4000/zip')).response,
+                    (await OnesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -493,19 +493,19 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.request.request.zip = { amaui: { unzip: false } };
-                  AmauiRequest.defaults.request.response.type = 'text';
+                  OnesyRequest.defaults.request.request.zip = { onesy: { unzip: false } };
+                  OnesyRequest.defaults.request.response.type = 'text';
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.request.request.zip = { amaui: { unzip: false } };
-                    window.AmauiRequest.defaults.request.response.type = 'text';
+                    window.OnesyRequest.defaults.request.request.zip = { onesy: { unzip: false } };
+                    window.OnesyRequest.defaults.request.response.type = 'text';
 
                     return [
-                      (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
+                      (await window.OnesyRequest.get('http://localhost:4000/zip')).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.get('http://localhost:4000/zip')).response,
+                    (await OnesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -521,14 +521,14 @@ group('AmauiRequest', () => {
           });
 
           to('agents', async () => {
-            AmauiRequest.defaults.request.request.agents = {
+            OnesyRequest.defaults.request.request.agents = {
               http: new http.Agent(),
               https: new https.Agent(),
             };
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
+            const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
 
             assert(value).eql({
               "userId": 1,
@@ -539,12 +539,12 @@ group('AmauiRequest', () => {
           });
 
           to('timeout', async () => {
-            AmauiRequest.defaults.request.request.timeout = 4;
+            OnesyRequest.defaults.request.request.timeout = 4;
 
             const method = new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+              onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
             });
 
             const values_ = [
@@ -552,12 +552,12 @@ group('AmauiRequest', () => {
             ];
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.request.request.timeout = 4;
+              window.OnesyRequest.defaults.request.request.timeout = 4;
 
               const method = new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+                onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
               });
 
               return [
@@ -575,30 +575,30 @@ group('AmauiRequest', () => {
         group('response', () => {
 
           to('pure', async () => {
-            AmauiRequest.defaults.request.response.pure = true;
+            OnesyRequest.defaults.request.response.pure = true;
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
             const values_ = [
-              await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'),
+              await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'),
             ];
 
-            AmauiRequest.defaults.request.response.pure = false;
+            OnesyRequest.defaults.request.response.pure = false;
 
-            values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
+            values_.push(await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.request.response.pure = true;
+              window.OnesyRequest.defaults.request.response.pure = true;
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
               const values_ = [
-                await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'),
+                await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'),
               ];
 
-              window.AmauiRequest.defaults.request.response.pure = false;
+              window.OnesyRequest.defaults.request.response.pure = false;
 
-              values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
+              values_.push(await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
               return values_;
             });
@@ -624,38 +624,38 @@ group('AmauiRequest', () => {
 
           to('resolveOnError', async () => {
             const method: any = () => new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
             });
 
             const method1: any = () => new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
             });
 
             const values_ = [
-              (AmauiRequest.defaults.request.response.resolveOnError = false) || (await method()).status,
-              (AmauiRequest.defaults.request.response.resolveOnError = true) && (await method1()).status,
+              (OnesyRequest.defaults.request.response.resolveOnError = false) || (await method()).status,
+              (OnesyRequest.defaults.request.response.resolveOnError = true) && (await method1()).status,
             ];
 
             const valueBrowsers = await evaluate(async (window: any) => {
               const method: any = () => new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
               });
 
               const method1: any = () => new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
               });
 
               const values_ = [
-                (window.AmauiRequest.defaults.request.response.resolveOnError = false) || (await method()).status,
-                (window.AmauiRequest.defaults.request.response.resolveOnError = true) && (await method1()).status,
+                (window.OnesyRequest.defaults.request.response.resolveOnError = false) || (await method()).status,
+                (window.OnesyRequest.defaults.request.response.resolveOnError = true) && (await method1()).status,
               ];
 
               return values_;
@@ -675,12 +675,12 @@ group('AmauiRequest', () => {
 
               to('text', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.request.response.type = 'text';
+                  window.OnesyRequest.defaults.request.response.type = 'text';
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
+                    typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -692,12 +692,12 @@ group('AmauiRequest', () => {
 
               to('json', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.request.response.type = 'json';
+                  window.OnesyRequest.defaults.request.response.type = 'json';
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -709,12 +709,12 @@ group('AmauiRequest', () => {
 
               to('arraybuffer', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.request.response.type = 'arraybuffer';
+                  window.OnesyRequest.defaults.request.response.type = 'arraybuffer';
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -726,12 +726,12 @@ group('AmauiRequest', () => {
 
               to('blob', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.request.response.type = 'blob';
+                  window.OnesyRequest.defaults.request.response.type = 'blob';
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -743,12 +743,12 @@ group('AmauiRequest', () => {
 
               to('document', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.request.response.type = 'document';
+                  window.OnesyRequest.defaults.request.response.type = 'document';
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -763,31 +763,31 @@ group('AmauiRequest', () => {
             group('node', () => {
 
               to('text', async () => {
-                AmauiRequest.defaults.request.response.type = 'text';
+                OnesyRequest.defaults.request.response.type = 'text';
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
+                const value = typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
 
                 assert(value).eq(true);
               });
 
               to('json', async () => {
-                AmauiRequest.defaults.request.response.type = 'json';
+                OnesyRequest.defaults.request.response.type = 'json';
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
 
                 assert(value).eq(true);
               });
 
               to('buffer', async () => {
-                AmauiRequest.defaults.request.response.type = 'buffer';
+                OnesyRequest.defaults.request.response.type = 'buffer';
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
 
                 assert(value).eq(true);
               });
@@ -799,32 +799,32 @@ group('AmauiRequest', () => {
           group('parse', () => {
 
             to('json', async () => {
-              AmauiRequest.defaults.request.response.type = undefined;
-              AmauiRequest.defaults.request.response.parse.json = true;
+              OnesyRequest.defaults.request.response.type = undefined;
+              OnesyRequest.defaults.request.response.parse.json = true;
 
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
               const values_ = [
-                (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+                (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
               ];
 
-              AmauiRequest.defaults.request.response.parse.json = false;
+              OnesyRequest.defaults.request.response.parse.json = false;
 
-              values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+              values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
               const valueBrowsers = await evaluate(async (window: any) => {
-                window.AmauiRequest.defaults.request.response.type = undefined;
-                window.AmauiRequest.defaults.request.response.parse.json = true;
+                window.OnesyRequest.defaults.request.response.type = undefined;
+                window.OnesyRequest.defaults.request.response.parse.json = true;
 
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
                 const values_ = [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
                 ];
 
-                window.AmauiRequest.defaults.request.response.parse.json = false;
+                window.OnesyRequest.defaults.request.response.parse.json = false;
 
-                values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+                values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
                 return values_;
               });
@@ -856,15 +856,15 @@ group('AmauiRequest', () => {
             const valueBrowsers = await evaluate(async (window: any) => {
               window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
 
-              window.AmauiRequest.defaults.get.request = { withCredentials: true };
+              window.OnesyRequest.defaults.get.request = { withCredentials: true };
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
-              window.AmauiRequest.defaults.get.request.withCredentials = false;
+              window.OnesyRequest.defaults.get.request.withCredentials = false;
 
-              const response1 = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response1 = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return [
                 (response.request as any).headers,
@@ -880,18 +880,18 @@ group('AmauiRequest', () => {
           });
 
           to('headers', async () => {
-            AmauiRequest.defaults.get.request = { headers: { 'AMAUI-TOKEN': 'a4' } };
+            OnesyRequest.defaults.get.request = { headers: { 'AMAUI-TOKEN': 'a4' } };
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const values_ = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+            const values_ = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.get.request = { headers: { 'AMAUI-TOKEN': 'a4' } };
+              window.OnesyRequest.defaults.get.request = { headers: { 'AMAUI-TOKEN': 'a4' } };
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
               return (response.request as any).headers;
             });
@@ -903,34 +903,34 @@ group('AmauiRequest', () => {
 
           group('zip', () => {
 
-            group('amaui', () => {
+            group('onesy', () => {
 
               group('zip', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: false } };
+                  OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: false } };
+                    window.OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', true)).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', true)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', true)).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', true)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -939,14 +939,14 @@ group('AmauiRequest', () => {
                       data: 'a',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: 4,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -957,7 +957,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -966,7 +966,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -977,14 +977,14 @@ group('AmauiRequest', () => {
                       ],
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: true,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -995,21 +995,21 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.post.request.zip = { amaui: { zip: false, only_positive: false } };
+                  OnesyRequest.defaults.post.request.zip = { onesy: { zip: false, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.post.request.zip = { amaui: { zip: false, only_positive: false } };
+                    window.OnesyRequest.defaults.post.request.zip = { onesy: { zip: false, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -1044,19 +1044,19 @@ group('AmauiRequest', () => {
               group('only_positive', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: true } };
+                  OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: true } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: true } };
+                    window.OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: true } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -1065,7 +1065,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -1080,19 +1080,19 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: false } };
+                  OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: false } };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.post.request.zip = { amaui: { zip: true, only_positive: false } };
+                    window.OnesyRequest.defaults.post.request.zip = { onesy: { zip: true, only_positive: false } };
 
                     return [
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                      (await window.AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                      (await window.OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await AmauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await OnesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -1101,7 +1101,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -1110,7 +1110,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     }
                   ]));
@@ -1121,19 +1121,19 @@ group('AmauiRequest', () => {
               group('unzip', () => {
 
                 to('true', async () => {
-                  AmauiRequest.defaults.get.request = { zip: { amaui: { unzip: true } } };
-                  AmauiRequest.defaults.get.response = { type: 'text' };
+                  OnesyRequest.defaults.get.request = { zip: { onesy: { unzip: true } } };
+                  OnesyRequest.defaults.get.response = { type: 'text' };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.get.request = { zip: { amaui: { unzip: true } } };
-                    window.AmauiRequest.defaults.get.response = { type: 'text' };
+                    window.OnesyRequest.defaults.get.request = { zip: { onesy: { unzip: true } } };
+                    window.OnesyRequest.defaults.get.response = { type: 'text' };
 
                     return [
-                      (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
+                      (await window.OnesyRequest.get('http://localhost:4000/zip')).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.get('http://localhost:4000/zip')).response,
+                    (await OnesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -1145,19 +1145,19 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  AmauiRequest.defaults.get.request = { zip: { amaui: { unzip: false } } };
-                  AmauiRequest.defaults.get.response = { type: 'text' };
+                  OnesyRequest.defaults.get.request = { zip: { onesy: { unzip: false } } };
+                  OnesyRequest.defaults.get.response = { type: 'text' };
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    window.AmauiRequest.defaults.get.request = { zip: { amaui: { unzip: false } } };
-                    window.AmauiRequest.defaults.get.response = { type: 'text' };
+                    window.OnesyRequest.defaults.get.request = { zip: { onesy: { unzip: false } } };
+                    window.OnesyRequest.defaults.get.response = { type: 'text' };
 
                     return [
-                      (await window.AmauiRequest.get('http://localhost:4000/zip')).response,
+                      (await window.OnesyRequest.get('http://localhost:4000/zip')).response,
                     ];
                   });
                   const valueNode = [
-                    (await AmauiRequest.get('http://localhost:4000/zip')).response,
+                    (await OnesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -1173,16 +1173,16 @@ group('AmauiRequest', () => {
           });
 
           to('agents', async () => {
-            AmauiRequest.defaults.get.request = {
+            OnesyRequest.defaults.get.request = {
               agents: {
                 http: new http.Agent(),
                 https: new https.Agent(),
               },
             };
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
+            const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
 
             assert(value).eql({
               "userId": 1,
@@ -1193,12 +1193,12 @@ group('AmauiRequest', () => {
           });
 
           to('timeout', async () => {
-            AmauiRequest.defaults.get.request = { timeout: 4 };
+            OnesyRequest.defaults.get.request = { timeout: 4 };
 
             const method = new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+              onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
             });
 
             const values_ = [
@@ -1206,12 +1206,12 @@ group('AmauiRequest', () => {
             ];
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.get.request = { timeout: 4 };
+              window.OnesyRequest.defaults.get.request = { timeout: 4 };
 
               const method = new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+                onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
               });
 
               return [
@@ -1230,30 +1230,30 @@ group('AmauiRequest', () => {
         group('response', () => {
 
           to('pure', async () => {
-            AmauiRequest.defaults.get.response = { pure: true };
+            OnesyRequest.defaults.get.response = { pure: true };
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
             const values_ = [
-              await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'),
+              await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'),
             ];
 
-            AmauiRequest.defaults.get.response.pure = false;
+            OnesyRequest.defaults.get.response.pure = false;
 
-            values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
+            values_.push(await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              window.AmauiRequest.defaults.get.response = { pure: true };
+              window.OnesyRequest.defaults.get.response = { pure: true };
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
               const values_ = [
-                await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'),
+                await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'),
               ];
 
-              window.AmauiRequest.defaults.get.response.pure = false;
+              window.OnesyRequest.defaults.get.response.pure = false;
 
-              values_.push(await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1'));
+              values_.push(await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1'));
 
               return values_;
             });
@@ -1279,38 +1279,38 @@ group('AmauiRequest', () => {
 
           to('resolveOnError', async () => {
             const method: any = () => new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
             });
 
             const method1: any = () => new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
             });
 
             const values_ = [
-              (AmauiRequest.defaults.get.response = { resolveOnError: false }) && (await method()).status,
-              (AmauiRequest.defaults.get.response.resolveOnError = true) && (await method1()).status,
+              (OnesyRequest.defaults.get.response = { resolveOnError: false }) && (await method()).status,
+              (OnesyRequest.defaults.get.response.resolveOnError = true) && (await method1()).status,
             ];
 
             const valueBrowsers = await evaluate(async (window: any) => {
               const method: any = () => new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
               });
 
               const method1: any = () => new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
               });
 
               const values_ = [
-                (window.AmauiRequest.defaults.get.response = { resolveOnError: false }) && (await method()).status,
-                (window.AmauiRequest.defaults.get.response.resolveOnError = true) && (await method1()).status,
+                (window.OnesyRequest.defaults.get.response = { resolveOnError: false }) && (await method()).status,
+                (window.OnesyRequest.defaults.get.response.resolveOnError = true) && (await method1()).status,
               ];
 
               return values_;
@@ -1330,12 +1330,12 @@ group('AmauiRequest', () => {
 
               to('text', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.get.response = { type: 'text' };
+                  window.OnesyRequest.defaults.get.response = { type: 'text' };
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
+                    typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -1347,12 +1347,12 @@ group('AmauiRequest', () => {
 
               to('json', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.get.response = { type: 'json' };
+                  window.OnesyRequest.defaults.get.response = { type: 'json' };
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -1364,12 +1364,12 @@ group('AmauiRequest', () => {
 
               to('arraybuffer', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.get.response = { type: 'arraybuffer' };
+                  window.OnesyRequest.defaults.get.response = { type: 'arraybuffer' };
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -1381,12 +1381,12 @@ group('AmauiRequest', () => {
 
               to('blob', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.get.response = { type: 'blob' };
+                  window.OnesyRequest.defaults.get.response = { type: 'blob' };
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -1398,12 +1398,12 @@ group('AmauiRequest', () => {
 
               to('document', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  window.AmauiRequest.defaults.get.response = { type: 'document' };
+                  window.OnesyRequest.defaults.get.response = { type: 'document' };
 
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -1418,31 +1418,31 @@ group('AmauiRequest', () => {
             group('node', () => {
 
               to('text', async () => {
-                AmauiRequest.defaults.get.response = { type: 'text' };
+                OnesyRequest.defaults.get.response = { type: 'text' };
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
+                const value = typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
 
                 assert(value).eq(true);
               });
 
               to('json', async () => {
-                AmauiRequest.defaults.get.response = { type: 'json' };
+                OnesyRequest.defaults.get.response = { type: 'json' };
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
 
                 assert(value).eq(true);
               });
 
               to('buffer', async () => {
-                AmauiRequest.defaults.get.response = { type: 'buffer' };
+                OnesyRequest.defaults.get.response = { type: 'buffer' };
 
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
 
                 assert(value).eq(true);
               });
@@ -1454,30 +1454,30 @@ group('AmauiRequest', () => {
           group('parse', () => {
 
             to('json', async () => {
-              AmauiRequest.defaults.get.response = { type: undefined, parse: { json: true } };
+              OnesyRequest.defaults.get.response = { type: undefined, parse: { json: true } };
 
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
               const values_ = [
-                (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+                (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
               ];
 
-              AmauiRequest.defaults.get.response.parse.json = false;
+              OnesyRequest.defaults.get.response.parse.json = false;
 
-              values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+              values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
               const valueBrowsers = await evaluate(async (window: any) => {
-                window.AmauiRequest.defaults.get.response = { type: undefined, parse: { json: true } };
+                window.OnesyRequest.defaults.get.response = { type: undefined, parse: { json: true } };
 
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
                 const values_ = [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
                 ];
 
-                window.AmauiRequest.defaults.get.response.parse.json = false;
+                window.OnesyRequest.defaults.get.response.parse.json = false;
 
-                values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+                values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
                 return values_;
               });
@@ -1505,11 +1505,11 @@ group('AmauiRequest', () => {
 
     to('get', async () => {
       const values_ = [
-        (await AmauiRequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+        (await OnesyRequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+        (await window.OnesyRequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1526,11 +1526,11 @@ group('AmauiRequest', () => {
 
     to('post', async () => {
       const values_ = [
-        (await AmauiRequest.post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
+        (await OnesyRequest.post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
+        (await window.OnesyRequest.post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1545,11 +1545,11 @@ group('AmauiRequest', () => {
 
     to('put', async () => {
       const values_ = [
-        (await AmauiRequest.put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await OnesyRequest.put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await window.OnesyRequest.put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1564,11 +1564,11 @@ group('AmauiRequest', () => {
 
     to('patch', async () => {
       const values_ = [
-        (await AmauiRequest.patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await OnesyRequest.patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await window.OnesyRequest.patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1586,11 +1586,11 @@ group('AmauiRequest', () => {
 
     to('head', async () => {
       const values_ = [
-        (await AmauiRequest.head('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await OnesyRequest.head('https://jsonplaceholder.typicode.com/posts/1')).status,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.head('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await window.OnesyRequest.head('https://jsonplaceholder.typicode.com/posts/1')).status,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1603,14 +1603,14 @@ group('AmauiRequest', () => {
     to('options', async () => {
       const valueBrowsers = await evaluate(async (window: any) => {
         const method = new Promise(resolve => {
-          window.AmauiRequest.options('https://jsonplaceholder.typicode.com/posts/1').then().catch((error: any) => resolve(error));
+          window.OnesyRequest.options('https://jsonplaceholder.typicode.com/posts/1').then().catch((error: any) => resolve(error));
         });
 
         return [
           (await method as any).type,
         ];
       });
-      const valueNode = (await AmauiRequest.options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
+      const valueNode = (await OnesyRequest.options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
 
       assert(valueNode).eq('GET,HEAD,PUT,PATCH,POST,DELETE');
 
@@ -1621,11 +1621,11 @@ group('AmauiRequest', () => {
 
     to('delete', async () => {
       const values_ = [
-        (await AmauiRequest.delete('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await OnesyRequest.delete('https://jsonplaceholder.typicode.com/posts/1')).status,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await window.AmauiRequest.delete('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await window.OnesyRequest.delete('https://jsonplaceholder.typicode.com/posts/1')).status,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -1636,27 +1636,27 @@ group('AmauiRequest', () => {
     });
 
     to('reset', async () => {
-      AmauiRequest.defaults.request.response.pure = true;
+      OnesyRequest.defaults.request.response.pure = true;
 
       const values_: any = [
-        AmauiRequest.defaults.request.response.pure,
+        OnesyRequest.defaults.request.response.pure,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => {
-        window.AmauiRequest.defaults.request.response.pure = true;
+        window.OnesyRequest.defaults.request.response.pure = true;
 
         const result: any = [
-          window.AmauiRequest.defaults.request.response.pure,
+          window.OnesyRequest.defaults.request.response.pure,
         ];
 
-        window.AmauiRequest.reset();
+        window.OnesyRequest.reset();
 
-        result.push(window.AmauiRequest.defaults);
+        result.push(window.OnesyRequest.defaults);
 
         return result;
       });
 
-      values_.push(AmauiRequest.defaults);
+      values_.push(OnesyRequest.defaults);
 
       const valueNode = values_;
 
@@ -1664,13 +1664,13 @@ group('AmauiRequest', () => {
 
       values.forEach(value => assert(value).eql([
         true,
-        AmauiRequest.defaults,
+        OnesyRequest.defaults,
       ]));
     });
 
   });
 
-  group('amauiRequest', () => {
+  group('onesyRequest', () => {
 
     group('options', () => {
 
@@ -1680,13 +1680,13 @@ group('AmauiRequest', () => {
           const valueBrowsers = await evaluate(async (window: any) => {
             window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
 
-            const amauirequest = new window.AmauiRequest({ request: { withCredentials: true } });
+            const onesyrequest = new window.OnesyRequest({ request: { withCredentials: true } });
 
-            const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+            const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
-            const amauirequest1 = new window.AmauiRequest({ request: { withCredentials: false } });
+            const onesyrequest1 = new window.OnesyRequest({ request: { withCredentials: false } });
 
-            const response1 = await amauirequest1.get('https://jsonplaceholder.typicode.com/posts/1');
+            const response1 = await onesyrequest1.get('https://jsonplaceholder.typicode.com/posts/1');
 
             return [
               (response.request as any).headers,
@@ -1702,14 +1702,14 @@ group('AmauiRequest', () => {
         });
 
         to('headers', async () => {
-          const amauirequest = new AmauiRequest({ request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
+          const onesyrequest = new OnesyRequest({ request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
 
-          const values_ = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+          const values_ = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
           const valueBrowsers = await evaluate(async (window: any) => {
-            const amauirequest = new window.AmauiRequest({ request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
+            const onesyrequest = new window.OnesyRequest({ request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
 
-            const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+            const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
             return (response.request as any).headers;
           });
@@ -1721,34 +1721,34 @@ group('AmauiRequest', () => {
 
         group('zip', () => {
 
-          group('amaui', () => {
+          group('onesy', () => {
 
             group('zip', () => {
 
               to('true', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: false } } } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: false } } } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: false } } } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: false } } } });
 
                   return [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', true)).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', true)).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.post('http://localhost:4000/unzip', 'a')).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', 4)).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', true)).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', 'a')).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', 4)).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]))).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', true)).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1757,14 +1757,14 @@ group('AmauiRequest', () => {
                     data: 'a',
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
                     data: 4,
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1775,7 +1775,7 @@ group('AmauiRequest', () => {
                     },
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1784,7 +1784,7 @@ group('AmauiRequest', () => {
                     },
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1795,14 +1795,14 @@ group('AmauiRequest', () => {
                     ],
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
                     data: true,
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1813,21 +1813,21 @@ group('AmauiRequest', () => {
               });
 
               to('false', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { zip: false, only_positive: false } } } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { zip: false, only_positive: false } } } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { zip: false, only_positive: false } } } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { zip: false, only_positive: false } } } });
 
                   return [
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', undefined)).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1])).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', undefined)).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1862,19 +1862,19 @@ group('AmauiRequest', () => {
             group('only_positive', () => {
 
               to('true', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: true } } } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: true } } } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: true } } } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: true } } } });
 
                   return [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1883,7 +1883,7 @@ group('AmauiRequest', () => {
                     data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1898,19 +1898,19 @@ group('AmauiRequest', () => {
               });
 
               to('false', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: false } } } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: false } } } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { zip: true, only_positive: false } } } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { zip: true, only_positive: false } } } });
 
                   return [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
-                  (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.')).response,
+                  (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 })).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1919,7 +1919,7 @@ group('AmauiRequest', () => {
                     data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   },
                   {
@@ -1928,7 +1928,7 @@ group('AmauiRequest', () => {
                     },
                     headers: {
                       'content-type': 'text/plain',
-                      'amaui-encoding': 'amaui-zip'
+                      'onesy-encoding': 'onesy-zip'
                     }
                   }
                 ]));
@@ -1939,17 +1939,17 @@ group('AmauiRequest', () => {
             group('unzip', () => {
 
               to('true', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { unzip: true } } }, response: { type: 'text' } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { unzip: true } } }, response: { type: 'text' } });
 
                   return [
-                    (await amauiRequest.get('http://localhost:4000/zip')).response,
+                    (await onesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.get('http://localhost:4000/zip')).response,
+                  (await onesyRequest.get('http://localhost:4000/zip')).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1961,17 +1961,17 @@ group('AmauiRequest', () => {
               });
 
               to('false', async () => {
-                const amauiRequest = new AmauiRequest({ request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } });
+                const onesyRequest = new OnesyRequest({ request: { zip: { onesy: { unzip: false } } }, response: { type: 'text' } });
 
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauiRequest = new window.AmauiRequest({ request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } });
+                  const onesyRequest = new window.OnesyRequest({ request: { zip: { onesy: { unzip: false } } }, response: { type: 'text' } });
 
                   return [
-                    (await amauiRequest.get('http://localhost:4000/zip')).response,
+                    (await onesyRequest.get('http://localhost:4000/zip')).response,
                   ];
                 });
                 const valueNode = [
-                  (await amauiRequest.get('http://localhost:4000/zip')).response,
+                  (await onesyRequest.get('http://localhost:4000/zip')).response,
                 ];
                 const values = [valueNode, ...valueBrowsers];
 
@@ -1987,7 +1987,7 @@ group('AmauiRequest', () => {
         });
 
         to('agents', async () => {
-          const amauirequest = new AmauiRequest({
+          const onesyrequest = new OnesyRequest({
             request: {
               agents: {
                 http: new http.Agent(),
@@ -1996,7 +1996,7 @@ group('AmauiRequest', () => {
             },
           });
 
-          const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
+          const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response;
 
           assert(value).eql({
             "userId": 1,
@@ -2008,9 +2008,9 @@ group('AmauiRequest', () => {
 
         to('timeout', async () => {
           const method = new Promise(resolve => {
-            const amauirequest = new AmauiRequest({ request: { timeout: 4 } });
+            const onesyrequest = new OnesyRequest({ request: { timeout: 4 } });
 
-            amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+            onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
           });
 
           const values_ = [
@@ -2019,9 +2019,9 @@ group('AmauiRequest', () => {
 
           const valueBrowsers = await evaluate(async (window: any) => {
             const method = new Promise(resolve => {
-              const amauirequest = new window.AmauiRequest({ request: { timeout: 4 } });
+              const onesyrequest = new window.OnesyRequest({ request: { timeout: 4 } });
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
+              onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14').then(value => resolve(value)).catch(error => resolve(error));
             });
 
             return [
@@ -2040,17 +2040,17 @@ group('AmauiRequest', () => {
 
         to('pure', async () => {
           const values_ = [
-            await new AmauiRequest({ response: { pure: true } }).get('https://jsonplaceholder.typicode.com/posts/1'),
+            await new OnesyRequest({ response: { pure: true } }).get('https://jsonplaceholder.typicode.com/posts/1'),
           ];
 
-          values_.push(await new AmauiRequest({ response: { pure: false } }).get('https://jsonplaceholder.typicode.com/posts/1'));
+          values_.push(await new OnesyRequest({ response: { pure: false } }).get('https://jsonplaceholder.typicode.com/posts/1'));
 
           const valueBrowsers = await evaluate(async (window: any) => {
             const values_ = [
-              await new window.AmauiRequest({ response: { pure: true } }).get('https://jsonplaceholder.typicode.com/posts/1'),
+              await new window.OnesyRequest({ response: { pure: true } }).get('https://jsonplaceholder.typicode.com/posts/1'),
             ];
 
-            values_.push(await new window.AmauiRequest({ response: { pure: false } }).get('https://jsonplaceholder.typicode.com/posts/1'));
+            values_.push(await new window.OnesyRequest({ response: { pure: false } }).get('https://jsonplaceholder.typicode.com/posts/1'));
 
             return values_;
           });
@@ -2076,15 +2076,15 @@ group('AmauiRequest', () => {
 
         to('resolveOnError', async () => {
           const method: any = new Promise(resolve => {
-            const amauirequest = new AmauiRequest({ response: { resolveOnError: true } });
+            const onesyrequest = new OnesyRequest({ response: { resolveOnError: true } });
 
-            amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+            onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
           });
 
           const method1: any = new Promise(resolve => {
-            const amauirequest = new AmauiRequest({ response: { resolveOnError: false } });
+            const onesyrequest = new OnesyRequest({ response: { resolveOnError: false } });
 
-            amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+            onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
           });
 
           const values_ = [
@@ -2094,15 +2094,15 @@ group('AmauiRequest', () => {
 
           const valueBrowsers = await evaluate(async (window: any) => {
             const method: any = new Promise(resolve => {
-              const amauirequest = new window.AmauiRequest({ response: { resolveOnError: true } });
+              const onesyrequest = new window.OnesyRequest({ response: { resolveOnError: true } });
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then(resolve);
             });
 
             const method1: any = new Promise(resolve => {
-              const amauirequest = new window.AmauiRequest({ response: { resolveOnError: false } });
+              const onesyrequest = new window.OnesyRequest({ response: { resolveOnError: false } });
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1').then().catch(resolve);
             });
 
             const values_ = [
@@ -2127,10 +2127,10 @@ group('AmauiRequest', () => {
 
             to('text', async () => {
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest({ response: { type: 'text' } });
+                const onesyrequest = new window.OnesyRequest({ response: { type: 'text' } });
 
                 return [
-                  typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
+                  typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string',
                 ];
               });
               const values = [...valueBrowsers];
@@ -2142,10 +2142,10 @@ group('AmauiRequest', () => {
 
             to('json', async () => {
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest({ response: { type: 'json' } });
+                const onesyrequest = new window.OnesyRequest({ response: { type: 'json' } });
 
                 return [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object,
                 ];
               });
               const values = [...valueBrowsers];
@@ -2157,10 +2157,10 @@ group('AmauiRequest', () => {
 
             to('arraybuffer', async () => {
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest({ response: { type: 'arraybuffer' } });
+                const onesyrequest = new window.OnesyRequest({ response: { type: 'arraybuffer' } });
 
                 return [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof ArrayBuffer,
                 ];
               });
               const values = [...valueBrowsers];
@@ -2172,10 +2172,10 @@ group('AmauiRequest', () => {
 
             to('blob', async () => {
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest({ response: { type: 'blob' } });
+                const onesyrequest = new window.OnesyRequest({ response: { type: 'blob' } });
 
                 return [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Blob,
                 ];
               });
               const values = [...valueBrowsers];
@@ -2187,10 +2187,10 @@ group('AmauiRequest', () => {
 
             to('document', async () => {
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest({ response: { type: 'document' } });
+                const onesyrequest = new window.OnesyRequest({ response: { type: 'document' } });
 
                 return [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com')).response instanceof Document,
                 ];
               });
               const values = [...valueBrowsers];
@@ -2205,25 +2205,25 @@ group('AmauiRequest', () => {
           group('node', () => {
 
             to('text', async () => {
-              const amauirequest = new AmauiRequest({ response: { type: 'text' } });
+              const onesyrequest = new OnesyRequest({ response: { type: 'text' } });
 
-              const value = typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
+              const value = typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response === 'string';
 
               assert(value).eq(true);
             });
 
             to('json', async () => {
-              const amauirequest = new AmauiRequest({ response: { type: 'json' } });
+              const onesyrequest = new OnesyRequest({ response: { type: 'json' } });
 
-              const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
+              const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Object;
 
               assert(value).eq(true);
             });
 
             to('buffer', async () => {
-              const amauirequest = new AmauiRequest({ response: { type: 'buffer' } });
+              const onesyrequest = new OnesyRequest({ response: { type: 'buffer' } });
 
-              const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
+              const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response instanceof Buffer;
 
               assert(value).eq(true);
             });
@@ -2235,26 +2235,26 @@ group('AmauiRequest', () => {
         group('parse', () => {
 
           to('json', async () => {
-            const amauirequest = new AmauiRequest({ response: { type: undefined, parse: { json: true } } });
+            const onesyrequest = new OnesyRequest({ response: { type: undefined, parse: { json: true } } });
 
             const values_ = [
-              (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+              (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
             ];
 
-            const amauirequest1 = new AmauiRequest({ response: { type: undefined, parse: { json: false } } });
+            const onesyrequest1 = new OnesyRequest({ response: { type: undefined, parse: { json: false } } });
 
-            values_.push((await amauirequest1.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+            values_.push((await onesyrequest1.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              const amauirequest = new window.AmauiRequest({ response: { type: undefined, parse: { json: true } } });
+              const onesyrequest = new window.OnesyRequest({ response: { type: undefined, parse: { json: true } } });
 
               const values_ = [
-                (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
+                (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1')).response,
               ];
 
-              const amauirequest1 = new window.AmauiRequest({ response: { type: undefined, parse: { json: false } } });
+              const onesyrequest1 = new window.OnesyRequest({ response: { type: undefined, parse: { json: false } } });
 
-              values_.push((await amauirequest1.get('https://jsonplaceholder.typicode.com/posts/1')).response);
+              values_.push((await onesyrequest1.get('https://jsonplaceholder.typicode.com/posts/1')).response);
 
               return values_;
             });
@@ -2282,11 +2282,11 @@ group('AmauiRequest', () => {
 
       to('request', async () => {
         const values_ = [
-          (await new AmauiRequest().request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
+          (await new OnesyRequest().request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
         ];
 
         const valueBrowsers = await evaluate(async (window: any) => [
-          (await new window.AmauiRequest().request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
+          (await new window.OnesyRequest().request({ method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1' })).response,
         ]);
         const valueNode = values_;
         const values = [valueNode, ...valueBrowsers];
@@ -2305,13 +2305,13 @@ group('AmauiRequest', () => {
 
         to('cancel', async () => {
           const method = new Promise(resolve => {
-            const cancel = AmauiRequest.cancel;
+            const cancel = OnesyRequest.cancel;
 
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            (global.amauiEvents as events.EventEmitter).on('amaui-request-sent', () => cancel.cancel());
+            (global.onesyEvents as events.EventEmitter).on('onesy-request-sent', () => cancel.cancel());
 
-            amauirequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
+            onesyrequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
           });
 
           const values_ = [
@@ -2320,13 +2320,13 @@ group('AmauiRequest', () => {
 
           const valueBrowsers = await evaluate(async (window: any) => {
             const method = new Promise(resolve => {
-              const cancel = window.AmauiRequest.cancel;
+              const cancel = window.OnesyRequest.cancel;
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              window.addEventListener('amaui-request-sent', () => cancel.cancel());
+              window.addEventListener('onesy-request-sent', () => cancel.cancel());
 
-              amauirequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
+              onesyrequest.request({ method: 'GET', cancel, url: 'https://jsonplaceholder.typicode.com/posts/1' }).then().catch(error => resolve(error));
             });
 
             return [
@@ -2345,11 +2345,11 @@ group('AmauiRequest', () => {
             const valueBrowsers = await evaluate(async (window: any) => {
               window.document.cookie = 'AMAUI_CSRF-TOKEN=a4';
 
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { withCredentials: true } });
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { withCredentials: true } });
 
-              const response1 = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { withCredentials: false } });
+              const response1 = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { withCredentials: false } });
 
               return [
                 (response.request as any).headers,
@@ -2365,14 +2365,14 @@ group('AmauiRequest', () => {
           });
 
           to('headers', async () => {
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const values_ = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
+            const values_ = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
 
             const valueBrowsers = await evaluate(async (window: any) => {
-              const amauirequest = new window.AmauiRequest();
+              const onesyrequest = new window.OnesyRequest();
 
-              const response = await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
+              const response = await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { request: { headers: { 'AMAUI-TOKEN': 'a4' } } });
 
               return (response.request as any).headers;
             });
@@ -2384,34 +2384,34 @@ group('AmauiRequest', () => {
 
           group('zip', () => {
 
-            group('amaui', () => {
+            group('onesy', () => {
 
               group('zip', () => {
 
                 to('true', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.post('http://localhost:4000/unzip', 'a', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', 4, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]), { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', true, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', 'a', { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', 4, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]), { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', true, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'a', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', 4, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]), { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', true, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'a', { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 4, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', new Uint8Array([97, 97, 97]), { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', true, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2420,14 +2420,14 @@ group('AmauiRequest', () => {
                       data: 'a',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: 4,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2438,7 +2438,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2447,7 +2447,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2458,14 +2458,14 @@ group('AmauiRequest', () => {
                       ],
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
                       data: true,
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2476,21 +2476,21 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { amaui: { zip: false, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', [1, 4, 1], { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', undefined, { request: { zip: { onesy: { zip: false, only_positive: false } } } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2525,19 +2525,19 @@ group('AmauiRequest', () => {
               group('only_positive', () => {
 
                 to('true', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { onesy: { zip: true, only_positive: true } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: true } } } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: true } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { onesy: { zip: true, only_positive: true } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: true } } } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2546,7 +2546,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2561,19 +2561,19 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                      (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                      (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
-                    (await amauiRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { amaui: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.', { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
+                    (await onesyRequest.post('http://localhost:4000/unzip', { a: 4 }, { request: { zip: { onesy: { zip: true, only_positive: false } } } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2582,7 +2582,7 @@ group('AmauiRequest', () => {
                       data: 'Lorem u ipsum dolor sit amet, consectetur adipiscing elit.Fuscem dolor em, facilisis sed eratr sit amet,pharetra blandit augue.Sed id placerat felis, malesuada rutrum nisl.In ultrices sed mauris finibus mmalesuad. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.Integer cursus, odio id rutrum blandit, neque velit aliquam odio, at rhoncus elit est nec erat.Proin egestassed maurelit, eratr sit molestie nisi semper at.Cras interdum massa nec mmolestierutrum.Duis commodo venenatis justo, ac porta tellus pellentesque sed.Donec et nisi aumus.',
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     },
                     {
@@ -2591,7 +2591,7 @@ group('AmauiRequest', () => {
                       },
                       headers: {
                         'content-type': 'text/plain',
-                        'amaui-encoding': 'amaui-zip'
+                        'onesy-encoding': 'onesy-zip'
                       }
                     }
                   ]));
@@ -2602,17 +2602,17 @@ group('AmauiRequest', () => {
               group('unzip', () => {
 
                 to('true', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } })).response,
+                      (await onesyRequest.get('http://localhost:4000/zip', { request: { zip: { onesy: { unzip: true } } }, response: { type: 'text' } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: true } } }, response: { type: 'text' } })).response,
+                    (await onesyRequest.get('http://localhost:4000/zip', { request: { zip: { onesy: { unzip: true } } }, response: { type: 'text' } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2624,17 +2624,17 @@ group('AmauiRequest', () => {
                 });
 
                 to('false', async () => {
-                  const amauiRequest = new AmauiRequest();
+                  const onesyRequest = new OnesyRequest();
 
                   const valueBrowsers = await evaluate(async (window: any) => {
-                    const amauiRequest = new window.AmauiRequest();
+                    const onesyRequest = new window.OnesyRequest();
 
                     return [
-                      (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } })).response,
+                      (await onesyRequest.get('http://localhost:4000/zip', { request: { zip: { onesy: { unzip: false } } }, response: { type: 'text' } })).response,
                     ];
                   });
                   const valueNode = [
-                    (await amauiRequest.get('http://localhost:4000/zip', { request: { zip: { amaui: { unzip: false } } }, response: { type: 'text' } })).response,
+                    (await onesyRequest.get('http://localhost:4000/zip', { request: { zip: { onesy: { unzip: false } } }, response: { type: 'text' } })).response,
                   ];
                   const values = [valueNode, ...valueBrowsers];
 
@@ -2650,9 +2650,9 @@ group('AmauiRequest', () => {
           });
 
           to('agents', async () => {
-            const amauirequest = new AmauiRequest();
+            const onesyrequest = new OnesyRequest();
 
-            const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', {
+            const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', {
               request: {
                 agents: {
                   http: new http.Agent(),
@@ -2671,9 +2671,9 @@ group('AmauiRequest', () => {
 
           to('timeout', async () => {
             const method = new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/posts/14', { request: { timeout: 4 } }).then(value => resolve(value)).catch(error => resolve(error));
+              onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14', { request: { timeout: 4 } }).then(value => resolve(value)).catch(error => resolve(error));
             });
 
             const values_ = [
@@ -2682,9 +2682,9 @@ group('AmauiRequest', () => {
 
             const valueBrowsers = await evaluate(async (window: any) => {
               const method = new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/posts/14', { request: { timeout: 4 } }).then(value => resolve(value)).catch(error => resolve(error));
+                onesyrequest.get('https://jsonplaceholder.typicode.com/posts/14', { request: { timeout: 4 } }).then(value => resolve(value)).catch(error => resolve(error));
               });
 
               return [
@@ -2703,17 +2703,17 @@ group('AmauiRequest', () => {
 
           to('pure', async () => {
             const values_ = [
-              await new AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: true } }),
+              await new OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: true } }),
             ];
 
-            values_.push(await new AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: false } }));
+            values_.push(await new OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: false } }));
 
             const valueBrowsers = await evaluate(async (window: any) => {
               const values_ = [
-                await new window.AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: true } }),
+                await new window.OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: true } }),
               ];
 
-              values_.push(await new window.AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: false } }));
+              values_.push(await new window.OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1', { response: { pure: false } }));
 
               return values_;
             });
@@ -2739,15 +2739,15 @@ group('AmauiRequest', () => {
 
           to('resolveOnError', async () => {
             const method: any = new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: true } }).then(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: true } }).then(resolve);
             });
 
             const method1: any = new Promise(resolve => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
-              amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: false } }).then().catch(resolve);
+              onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: false } }).then().catch(resolve);
             });
 
             const values_ = [
@@ -2757,15 +2757,15 @@ group('AmauiRequest', () => {
 
             const valueBrowsers = await evaluate(async (window: any) => {
               const method: any = new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: true } }).then(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: true } }).then(resolve);
               });
 
               const method1: any = new Promise(resolve => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
-                amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: false } }).then().catch(resolve);
+                onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1', { response: { resolveOnError: false } }).then().catch(resolve);
               });
 
               const values_ = [
@@ -2790,10 +2790,10 @@ group('AmauiRequest', () => {
 
               to('text', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'text' } })).response === 'string',
+                    typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'text' } })).response === 'string',
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -2805,10 +2805,10 @@ group('AmauiRequest', () => {
 
               to('json', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'json' } })).response instanceof Object,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'json' } })).response instanceof Object,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -2820,10 +2820,10 @@ group('AmauiRequest', () => {
 
               to('arraybuffer', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'arraybuffer' } })).response instanceof ArrayBuffer,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'arraybuffer' } })).response instanceof ArrayBuffer,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -2835,10 +2835,10 @@ group('AmauiRequest', () => {
 
               to('blob', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'blob' } })).response instanceof Blob,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'blob' } })).response instanceof Blob,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -2850,10 +2850,10 @@ group('AmauiRequest', () => {
 
               to('document', async () => {
                 const valueBrowsers = await evaluate(async (window: any) => {
-                  const amauirequest = new window.AmauiRequest();
+                  const onesyrequest = new window.OnesyRequest();
 
                   return [
-                    (await amauirequest.get('https://jsonplaceholder.typicode.com', { response: { type: 'document' } })).response instanceof Document,
+                    (await onesyrequest.get('https://jsonplaceholder.typicode.com', { response: { type: 'document' } })).response instanceof Document,
                   ];
                 });
                 const values = [...valueBrowsers];
@@ -2868,25 +2868,25 @@ group('AmauiRequest', () => {
             group('node', () => {
 
               to('text', async () => {
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = typeof (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'text' } })).response === 'string';
+                const value = typeof (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'text' } })).response === 'string';
 
                 assert(value).eq(true);
               });
 
               to('json', async () => {
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'json' } })).response instanceof Object;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'json' } })).response instanceof Object;
 
                 assert(value).eq(true);
               });
 
               to('buffer', async () => {
-                const amauirequest = new AmauiRequest();
+                const onesyrequest = new OnesyRequest();
 
-                const value = (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'buffer' } })).response instanceof Buffer;
+                const value = (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: 'buffer' } })).response instanceof Buffer;
 
                 assert(value).eq(true);
               });
@@ -2898,22 +2898,22 @@ group('AmauiRequest', () => {
           group('parse', () => {
 
             to('json', async () => {
-              const amauirequest = new AmauiRequest();
+              const onesyrequest = new OnesyRequest();
 
               const values_ = [
-                (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: true } } })).response,
+                (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: true } } })).response,
               ];
 
-              values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: false } } })).response);
+              values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: false } } })).response);
 
               const valueBrowsers = await evaluate(async (window: any) => {
-                const amauirequest = new window.AmauiRequest();
+                const onesyrequest = new window.OnesyRequest();
 
                 const values_ = [
-                  (await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: true } } })).response,
+                  (await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: true } } })).response,
                 ];
 
-                values_.push((await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: false } } })).response);
+                values_.push((await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { response: { type: undefined, parse: { json: false } } })).response);
 
                 return values_;
               });
@@ -2941,11 +2941,11 @@ group('AmauiRequest', () => {
 
     to('get', async () => {
       const values_ = [
-        (await new AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1')).response,
+        (await new OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1')).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().get('https://jsonplaceholder.typicode.com/posts/1')).response,
+        (await new window.OnesyRequest().get('https://jsonplaceholder.typicode.com/posts/1')).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -2962,11 +2962,11 @@ group('AmauiRequest', () => {
 
     to('post', async () => {
       const values_ = [
-        (await new AmauiRequest().post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
+        (await new OnesyRequest().post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
+        (await new window.OnesyRequest().post('https://jsonplaceholder.typicode.com/posts', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -2981,11 +2981,11 @@ group('AmauiRequest', () => {
 
     to('put', async () => {
       const values_ = [
-        (await new AmauiRequest().put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await new OnesyRequest().put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await new window.OnesyRequest().put('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -3000,11 +3000,11 @@ group('AmauiRequest', () => {
 
     to('patch', async () => {
       const values_ = [
-        (await new AmauiRequest().patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await new OnesyRequest().patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
+        (await new window.OnesyRequest().patch('https://jsonplaceholder.typicode.com/posts/1', { a: 4 })).response,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -3022,11 +3022,11 @@ group('AmauiRequest', () => {
 
     to('head', async () => {
       const values_ = [
-        (await new AmauiRequest().head('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await new OnesyRequest().head('https://jsonplaceholder.typicode.com/posts/1')).status,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().head('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await new window.OnesyRequest().head('https://jsonplaceholder.typicode.com/posts/1')).status,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -3039,14 +3039,14 @@ group('AmauiRequest', () => {
     to('options', async () => {
       const valueBrowsers = await evaluate(async (window: any) => {
         const method = new Promise(resolve => {
-          new window.AmauiRequest().options('https://jsonplaceholder.typicode.com/posts/1').then().catch(error => resolve(error));
+          new window.OnesyRequest().options('https://jsonplaceholder.typicode.com/posts/1').then().catch(error => resolve(error));
         });
 
         return [
           (await method as any).type,
         ];
       });
-      const valueNode = (await new AmauiRequest().options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
+      const valueNode = (await new OnesyRequest().options('https://jsonplaceholder.typicode.com/posts/1')).headers['access-control-allow-methods'];
 
       assert(valueNode).eq('GET,HEAD,PUT,PATCH,POST,DELETE');
 
@@ -3057,11 +3057,11 @@ group('AmauiRequest', () => {
 
     to('delete', async () => {
       const values_ = [
-        (await new AmauiRequest().delete('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await new OnesyRequest().delete('https://jsonplaceholder.typicode.com/posts/1')).status,
       ];
 
       const valueBrowsers = await evaluate(async (window: any) => [
-        (await new window.AmauiRequest().delete('https://jsonplaceholder.typicode.com/posts/1')).status,
+        (await new window.OnesyRequest().delete('https://jsonplaceholder.typicode.com/posts/1')).status,
       ]);
       const valueNode = values_;
       const values = [valueNode, ...valueBrowsers];
@@ -3079,16 +3079,16 @@ group('AmauiRequest', () => {
           post: [],
           success: [],
         };
-        const amauirequest = new AmauiRequest();
+        const onesyrequest = new OnesyRequest();
 
-        amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        amauirequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
-        AmauiRequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
+        onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        onesyrequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
+        OnesyRequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
 
-        await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+        await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
         const values_ = [
           interceptors.pre[0].url,
@@ -3105,16 +3105,16 @@ group('AmauiRequest', () => {
             post: [],
             success: [],
           };
-          const amauirequest = new window.AmauiRequest();
+          const onesyrequest = new window.OnesyRequest();
 
-          amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          window.AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          window.AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          amauirequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
-          window.AmauiRequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
+          onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          window.OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          window.OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          onesyrequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
+          window.OnesyRequest.interceptors.response.success.subscribe(value => interceptors.success.push(value));
 
-          await amauirequest.get('https://jsonplaceholder.typicode.com/posts/1');
+          await onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1');
 
           return [
             interceptors.pre[0].url,
@@ -3144,16 +3144,16 @@ group('AmauiRequest', () => {
           post: [],
           error: [],
         };
-        const amauirequest = new AmauiRequest();
+        const onesyrequest = new OnesyRequest();
 
-        amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        amauirequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
-        AmauiRequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
+        onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        onesyrequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
+        OnesyRequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
 
-        await amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1');
+        await onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1');
 
         const values_ = [
           interceptors.pre[0].url,
@@ -3170,16 +3170,16 @@ group('AmauiRequest', () => {
             post: [],
             error: [],
           };
-          const amauirequest = new window.AmauiRequest();
+          const onesyrequest = new window.OnesyRequest();
 
-          amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          window.AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          window.AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          amauirequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
-          window.AmauiRequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
+          onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          window.OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          window.OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          onesyrequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
+          window.OnesyRequest.interceptors.response.error.subscribe(value => interceptors.error.push(value));
 
-          await amauirequest.get('https://jsonplaceholder.typicode.com/postsa/1');
+          await onesyrequest.get('https://jsonplaceholder.typicode.com/postsa/1');
 
           return [
             interceptors.pre[0].url,
@@ -3209,20 +3209,20 @@ group('AmauiRequest', () => {
           post: [],
           fail: [],
         };
-        const amauirequest = new AmauiRequest();
-        const cancel = AmauiRequest.cancel;
+        const onesyrequest = new OnesyRequest();
+        const cancel = OnesyRequest.cancel;
 
-        amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-        amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-        amauirequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
-        AmauiRequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
+        onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+        onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+        onesyrequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
+        OnesyRequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
 
         const method = new Promise(resolve => {
-          (global.amauiEvents as events.EventEmitter).on('amaui-request-sent', () => cancel.cancel());
+          (global.onesyEvents as events.EventEmitter).on('onesy-request-sent', () => cancel.cancel());
 
-          amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { cancel }).then().catch(error => resolve(error));
+          onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { cancel }).then().catch(error => resolve(error));
         });
 
         await method;
@@ -3242,20 +3242,20 @@ group('AmauiRequest', () => {
             post: [],
             fail: [],
           };
-          const amauirequest = new window.AmauiRequest();
-          const cancel = window.AmauiRequest.cancel;
+          const onesyrequest = new window.OnesyRequest();
+          const cancel = window.OnesyRequest.cancel;
 
-          amauirequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          window.AmauiRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
-          amauirequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          window.AmauiRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
-          amauirequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
-          window.AmauiRequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
+          onesyrequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          window.OnesyRequest.interceptors.request.pre.subscribe(value => interceptors.pre.push(value));
+          onesyrequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          window.OnesyRequest.interceptors.request.post.subscribe(value => interceptors.post.push(value));
+          onesyrequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
+          window.OnesyRequest.interceptors.response.fail.subscribe(value => interceptors.fail.push(value));
 
           const method = new Promise(resolve => {
-            window.addEventListener('amaui-request-sent', () => cancel.cancel());
+            window.addEventListener('onesy-request-sent', () => cancel.cancel());
 
-            amauirequest.get('https://jsonplaceholder.typicode.com/posts/1', { cancel }).then(a => resolve(a)).catch(error => resolve(error));
+            onesyrequest.get('https://jsonplaceholder.typicode.com/posts/1', { cancel }).then(a => resolve(a)).catch(error => resolve(error));
           });
 
           await method;
@@ -3295,7 +3295,7 @@ group('AmauiRequest', () => {
       form.append('ad', 'a4');
 
       const values_ = [
-        (await AmauiRequest.post('http://localhost:4000/api', form.toString(), {
+        (await OnesyRequest.post('http://localhost:4000/api', form.toString(), {
           request: {
             headers: {
               'content-type': 'application/x-www-form-urlencoded',
@@ -3311,7 +3311,7 @@ group('AmauiRequest', () => {
         form.append('ad', 'a4');
 
         return [
-          (await window.AmauiRequest.post('http://localhost:4000/api', form, {
+          (await window.OnesyRequest.post('http://localhost:4000/api', form, {
             request: {
               headers: {
                 'content-type': 'application/x-www-form-urlencoded',
@@ -3335,7 +3335,7 @@ group('AmauiRequest', () => {
     });
 
     to('multipart/form-data', async () => {
-      const file = await AmauiNode.file.get(filePath, false);
+      const file = await OnesyNode.file.get(filePath, false);
 
       const form = new FormData();
 
@@ -3344,7 +3344,7 @@ group('AmauiRequest', () => {
       form.append('file', file);
 
       const values_ = [
-        (await AmauiRequest.post('http://localhost:4000/multipart', form.getBuffer(), {
+        (await OnesyRequest.post('http://localhost:4000/multipart', form.getBuffer(), {
           request: {
             headers: {
               ...form.getHeaders(),
@@ -3365,7 +3365,7 @@ group('AmauiRequest', () => {
         form.append('file', file);
 
         return [
-          (await window.AmauiRequest.post('http://localhost:4000/multipart', form)).response,
+          (await window.OnesyRequest.post('http://localhost:4000/multipart', form)).response,
         ];
       }, {
         preEvaluate: async browser => {
@@ -3429,7 +3429,7 @@ group('AmauiRequest', () => {
           const file = input.files[0];
 
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', file, {
+            (await window.OnesyRequest.post('http://localhost:4000/api', file, {
               request: {
                 headers: {
                   'content-type': 'application/octet-stream',
@@ -3475,7 +3475,7 @@ group('AmauiRequest', () => {
 
       to('uint8array', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', new Uint8Array([97]), {
+          (await OnesyRequest.post('http://localhost:4000/api', new Uint8Array([97]), {
             request: {
               headers: {
                 'content-type': 'text/plain',
@@ -3486,7 +3486,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', new Uint8Array([97]), {
+            (await window.OnesyRequest.post('http://localhost:4000/api', new Uint8Array([97]), {
               request: {
                 headers: {
                   'content-type': 'text/plain',
@@ -3509,10 +3509,10 @@ group('AmauiRequest', () => {
       });
 
       to('buffer', async () => {
-        const file = await AmauiNode.file.get(filePath, false);
+        const file = await OnesyNode.file.get(filePath, false);
 
         const valueNode = [
-          (await AmauiRequest.post('http://localhost:4000/api', file, {
+          (await OnesyRequest.post('http://localhost:4000/api', file, {
             request: {
               headers: {
                 'content-type': 'application/octet-stream',
@@ -3537,7 +3537,7 @@ group('AmauiRequest', () => {
 
       to('text/plain', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', Buffer.from('a'), {
+          (await OnesyRequest.post('http://localhost:4000/api', Buffer.from('a'), {
             request: {
               headers: {
                 'content-type': 'text/plain',
@@ -3548,7 +3548,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', new TextEncoder().encode('a'), {
+            (await window.OnesyRequest.post('http://localhost:4000/api', new TextEncoder().encode('a'), {
               request: {
                 headers: {
                   'content-type': 'text/plain',
@@ -3570,7 +3570,7 @@ group('AmauiRequest', () => {
 
       to('text/html', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', Buffer.from('<a>a</a>'), {
+          (await OnesyRequest.post('http://localhost:4000/api', Buffer.from('<a>a</a>'), {
             request: {
               headers: {
                 'content-type': 'text/html',
@@ -3581,7 +3581,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', new TextEncoder().encode('<a>a</a>'), {
+            (await window.OnesyRequest.post('http://localhost:4000/api', new TextEncoder().encode('<a>a</a>'), {
               request: {
                 headers: {
                   'content-type': 'text/html',
@@ -3603,7 +3603,7 @@ group('AmauiRequest', () => {
 
       to('application/javascript', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', Buffer.from('const a = 4;'), {
+          (await OnesyRequest.post('http://localhost:4000/api', Buffer.from('const a = 4;'), {
             request: {
               headers: {
                 'content-type': 'application/javascript',
@@ -3614,7 +3614,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', new TextEncoder().encode('const a = 4;'), {
+            (await window.OnesyRequest.post('http://localhost:4000/api', new TextEncoder().encode('const a = 4;'), {
               request: {
                 headers: {
                   'content-type': 'application/javascript',
@@ -3636,7 +3636,7 @@ group('AmauiRequest', () => {
 
       to('application/json', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', {
+          (await OnesyRequest.post('http://localhost:4000/api', {
             a: 4,
             ad: 'a4',
           })).response,
@@ -3644,7 +3644,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', {
+            (await window.OnesyRequest.post('http://localhost:4000/api', {
               a: 4,
               ad: 'a4',
             })).response,
@@ -3666,7 +3666,7 @@ group('AmauiRequest', () => {
 
       to('application/xml', async () => {
         const values_ = [
-          (await AmauiRequest.post('http://localhost:4000/api', Buffer.from('<a>a</a>'), {
+          (await OnesyRequest.post('http://localhost:4000/api', Buffer.from('<a>a</a>'), {
             request: {
               headers: {
                 'content-type': 'application/xml',
@@ -3677,7 +3677,7 @@ group('AmauiRequest', () => {
 
         const valueBrowsers = await evaluate(async (window: any) => {
           return [
-            (await window.AmauiRequest.post('http://localhost:4000/api', new TextEncoder().encode('<a>a</a>'), {
+            (await window.OnesyRequest.post('http://localhost:4000/api', new TextEncoder().encode('<a>a</a>'), {
               request: {
                 headers: {
                   'content-type': 'application/xml',

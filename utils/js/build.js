@@ -4,8 +4,8 @@ const yargs = require('yargs');
 const fse = require('fs-extra');
 const fg = require('fast-glob');
 
-const AmauiNode = require('@amaui/node').default;
-const { promisify } = require('@amaui/utils');
+const OnesyNode = require('@onesy/node').default;
+const { promisify } = require('@onesy/utils');
 
 const wd = process.cwd();
 const moduleFolder = path.basename(process.cwd());
@@ -62,17 +62,17 @@ async function buildBabel(variant = 'esm') {
     // From the esm folder remove the required values
     // for it to not have webpack > 5 issues as a ref
     if (variant === 'esm') {
-      const amauiRequestPath = path.join(out, 'AmauiRequest.js');
+      const onesyRequestPath = path.join(out, 'OnesyRequest.js');
 
-      let values = await AmauiNode.file.get(amauiRequestPath, false);
+      let values = await OnesyNode.file.get(onesyRequestPath, false);
 
       values = values.split('\n');
 
       // Remove http, https, events imports
       values = [values[0], ...values.slice(4)];
 
-      // global.amauiEvents
-      let index = values.findIndex(item => item.includes('global.amauiEvents'));
+      // global.onesyEvents
+      let index = values.findIndex(item => item.includes('global.onesyEvents'));
 
       values.splice(index, 1);
 
@@ -82,18 +82,18 @@ async function buildBabel(variant = 'esm') {
       values[index] = `return this.xhr(options);`
 
       // Other
-      index = values.findIndex(item => item.includes(`import isEnvironment from '@amaui/utils/isEnvironment';`));
+      index = values.findIndex(item => item.includes(`import isEnvironment from '@onesy/utils/isEnvironment';`));
 
       values.splice(index, 1);
 
       // https method
       const startIndex = values.findIndex(item => item.includes('https() {'));
-      const endIndex = values.findIndex(item => item.includes(`global.amauiEvents.emit('amaui-request-sent');`)) + 4;
+      const endIndex = values.findIndex(item => item.includes(`global.onesyEvents.emit('onesy-request-sent');`)) + 4;
 
       values = [...values.slice(0, startIndex), ...values.slice(endIndex)];
 
       // Update
-      await AmauiNode.file.update(amauiRequestPath, values.join('\n'));
+      await OnesyNode.file.update(onesyRequestPath, values.join('\n'));
     }
   }
 
@@ -295,7 +295,7 @@ async function docsUpdateTypes(pathTypes, pathUse, isModules, options = {}) {
     previous: getName(previous),
     path: getName(pathTypes),
     next: getName(next),
-    lib: moduleFolder.replace('amaui-', '').replace(/[-_]/gi, ' ')
+    lib: moduleFolder.replace('onesy-', '').replace(/[-_]/gi, ' ')
   };
 
   if (names.path.includes('-')) names.path = capitalizedCammelCase(names.path);
@@ -446,7 +446,7 @@ async function docs() {
   // For each file find the appropriate use file
   // in docs public, and replace the api
   // with the new value
-  paths.md = path.resolve(wd, '../amaui/docs/public/assets/md/dev', moduleFolder.replace('amaui-', ''));
+  paths.md = path.resolve(wd, '../onesy/docs/public/assets/md/dev', moduleFolder.replace('onesy-', ''));
 
   paths.use = path.join(paths.md, 'use');
 

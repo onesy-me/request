@@ -1,1 +1,1 @@
-export { default } from './AmauiRequest';
+export { default } from './OnesyRequest';
