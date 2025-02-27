@@ -1235,6 +1235,16 @@
     path-to-regexp "^6.2.0"
     uuid "^8.3.2"
 
+"@onesy/utils@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@onesy/utils/-/utils-1.0.3.tgz#eeb25fce1370624a71d5bedfff9ea16ac9edc4b4"
+  integrity sha512-zAQVZ5cQ3Jtb5SUu1DAGdi+rFIMxCmOY2Uoo+1YmJmPgJVdvBHV4DgxKnop+2IYYqYvhuW33iiF+5ORm3sD2KQ==
+  dependencies:
+    "@babel/runtime" "^7.18.3"
+    crypto-js "^4.1.1"
+    path-to-regexp "^6.2.0"
+    uuid "^8.3.2"
+
 "@onesy/zip@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@onesy/zip/-/zip-1.0.0.tgz#ab4f3c89dee77248c2df364f58fb90608a569197"
