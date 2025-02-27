@@ -1,6 +1,6 @@
 {
   "name": "@onesy/request",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Requests client for browser and nodejs",
   "repository": "https://github.com/onesy-me/request.git",
   "author": "Lazar <lazareric2@gmail.com>",
@@ -40,18 +40,15 @@
     "test": "yarn lint && yarn type && yarn build && yarn test:pre && yarn cov && yarn test:post"
   },
   "dependencies": {
+    "@babel/runtime": "^7.18.3",
     "@onesy/cookie": "^1.0.0",
     "@onesy/huffman-code": "^1.0.0",
     "@onesy/lz77": "^1.0.0",
     "@onesy/subscription": "^1.0.0",
     "@onesy/utils": "^1.0.0",
-    "@onesy/zip": "^1.0.0",
-    "@babel/runtime": "^7.18.3"
+    "@onesy/zip": "^1.0.0"
   },
   "devDependencies": {
-    "@onesy/models": "^1.0.0",
-    "@onesy/node": "^1.0.0",
-    "@onesy/test": "^1.0.0",
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/plugin-proposal-class-properties": "^7.17.12",
@@ -59,6 +56,9 @@
     "@babel/plugin-transform-runtime": "^7.16.4",
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
+    "@onesy/models": "^1.0.0",
+    "@onesy/node": "^1.0.0",
+    "@onesy/test": "^1.0.0",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-json": "^4.1.0",

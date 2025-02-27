@@ -146,9 +146,7 @@ type TOnesyRequestDefaults = Record<'request' | 'get' | 'post' | 'put' | 'patch'
 export const OnesyRequestDefaults: TOnesyRequestDefaults = {
   request: {
     request: {
-      headers: {
-        'accept': 'application/json, text/plain, */*'
-      },
+      headers: {},
 
       zip: {
         onesy: {
@@ -421,6 +419,8 @@ class OnesyRequest {
       const { headers = {}, timeout, withCredentials, csrf } = requestOptions;
       const { type: typeOptions, parse: parse_, pure, resolveOnError } = responseOptions;
 
+      const headersNamesNormalized = Object.keys(headers).map(key => key.toLowerCase());
+
       const url = getURL(urlOptions);
 
       // CSRF
@@ -550,6 +550,8 @@ class OnesyRequest {
         ) body = serialize(body);
       }
 
+      if (!headersNamesNormalized.includes('accept')) headers.Accept = 'application/json, text/plain, */*';
+
       // Apply request xhr headers
       Object.keys(headers).forEach(key => {
         if (key.toLowerCase() === 'content-type' && body === undefined) delete headers[key];
@@ -632,6 +634,8 @@ class OnesyRequest {
       if (body) {
         headers['content-length'] = (body as Buffer).length;
       }
+
+      if (!headersNamesNormalized.includes('accept')) headers.Accept = 'application/json, text/plain, */*';
 
       const isProtocolSecure = url.protocol.slice(0, -1) === 'https';
       const protocolVariant = isProtocolSecure ? https : http;
